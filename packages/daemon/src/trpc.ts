@@ -1,4 +1,6 @@
-import { trpc, appRouter } from "@opentrader/trpc";
+import { type CreateExpressContextOptions } from "@trpc/server/adapters/express";
+
+import { trpc, appRouter, type Context } from "@opentrader/trpc";
 
 const ctx = {
   user: {
@@ -9,6 +11,18 @@ const ctx = {
   },
 };
 
-const createCaller = trpc.createCallerFactory(appRouter);
+// created for each request
+export const createContext = ({ req }: CreateExpressContextOptions): Context => {
+  const password = req.headers.authorization;
 
+  if (password === process.env.ADMIN_PASSWORD) {
+    return ctx;
+  }
+
+  return {
+    user: null,
+  };
+};
+
+const createCaller = trpc.createCallerFactory(appRouter);
 export const tServer = createCaller(ctx);

@@ -14,7 +14,7 @@ export async function bootstrapPlatform() {
   });
   logger.info(`🤖 Default bot: ${bot ? bot.label : "none"}`);
 
-  const platform = new Platform(exchangeAccounts, bot ? [bot] : []);
+  const platform = new Platform(exchangeAccounts);
 
   await platform.bootstrap();
 

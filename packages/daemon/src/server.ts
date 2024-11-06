@@ -1,59 +1,50 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import serveHandler from "serve-handler";
-import * as trpcExpress from "@trpc/server/adapters/express";
-import type { Express } from "express";
-import express from "express";
+import { createExpressMiddleware } from "@trpc/server/adapters/express";
+import express, { type Express } from "express";
 import cors from "cors";
+
 import { appRouter } from "@opentrader/trpc";
+import { createContext } from "./trpc.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// created for each request
-const createContext = ({ req, res }: trpcExpress.CreateExpressContextOptions) => {
-  const password = req.headers.authorization;
-
-  if (password === process.env.ADMIN_PASSWORD) {
-    return {
-      user: {
-        id: 1,
-        email: "onboarding@opentrader.pro",
-        displayName: "OpenTrader",
-        role: "Admin" as const,
-      },
-    };
-  }
-  ``;
-  return {
-    user: null,
-  };
+export type CreateServerOptions = {
+  /**
+   * Relative path to the Frontend dist directory, e.g. "../frontend" or "../../frontend/dist" for dev
+   */
+  frontendDistPath: string;
+  /**
+   * Listen Express on port
+   */
+  port: number;
 };
 
-export function useTrpc(app: Express) {
-  app.use(
-    "/api/trpc",
-    trpcExpress.createExpressMiddleware({
-      router: appRouter,
-      createContext,
-    }),
-  );
-}
-
-export const app: Express = express();
-
-app.use(cors());
-useTrpc(app);
-
-// Serve frontend app
-const staticDir = path.resolve(__dirname, "../frontend");
-app.get("*", (req, res) => serveHandler(req, res, { public: staticDir }));
-
-export const createServer = () => {
+export const createServer = ({ frontendDistPath, port }: CreateServerOptions) => {
+  const app: Express = express();
   let server: ReturnType<typeof app.listen> | null = null;
 
   return {
-    listen: (port: number, cb?: () => void) => {
+    app,
+    server,
+    listen: (cb?: () => void) => {
+      app.use(cors());
+
+      // Configure tRPC
+      app.use(
+        "/api/trpc",
+        createExpressMiddleware({
+          router: appRouter,
+          createContext,
+        }),
+      );
+
+      // Serve Frontend app
+      const staticDir = path.resolve(__dirname, frontendDistPath);
+      app.get("*", (req, res) => serveHandler(req, res, { public: staticDir }));
+
       server = app.listen(port, cb);
 
       return server;
@@ -63,13 +54,3 @@ export const createServer = () => {
     },
   };
 };
-
-// export const createClient = () => {
-//   return createTRPCProxyClient<typeof appRouter>({
-//     links: [
-//       httpBatchLink({
-//         url: "http://localhost:8000/api/trpc",
-//       }),
-//     ],
-//   });
-// };

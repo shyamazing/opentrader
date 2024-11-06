@@ -2,11 +2,11 @@ import { BarSize } from "@opentrader/types";
 import { logger } from "@opentrader/logger";
 import { findStrategy } from "@opentrader/bot-templates/server";
 import { ExchangeAccountWithCredentials, xprisma } from "@opentrader/db";
+import { tServer } from "@opentrader/daemon";
 import type { CommandResult } from "../types.js";
 import { createDaemonRpcClient } from "../daemon-rpc.js";
 import { readBotConfig, readExchangesConfig } from "../config.js";
 import { createOrUpdateBot, createOrUpdateExchangeAccounts, resetProcessing } from "src/utils/bot.js";
-import { tServer } from "../trpc.js";
 
 type Options = {
   config: string;

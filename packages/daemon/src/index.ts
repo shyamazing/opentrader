@@ -18,8 +18,12 @@
 import { Server } from "node:http";
 import { Platform } from "@opentrader/bot";
 import { logger } from "@opentrader/logger";
-import { createServer } from "./server.js";
+import { createServer, CreateServerOptions } from "./server.js";
 import { bootstrapPlatform } from "./platform.js";
+
+type DaemonParams = {
+  server: CreateServerOptions;
+};
 
 export class Daemon {
   constructor(
@@ -27,13 +31,13 @@ export class Daemon {
     private server: Server,
   ) {}
 
-  static async create() {
+  static async create(params: DaemonParams) {
     const platform = await bootstrapPlatform();
     logger.info("✅ Platform bootstrapped successfully");
 
-    const server = createServer().listen(8000);
-    logger.info("RPC Server listening on port 8000");
-    logger.info("OpenTrader UI: http://localhost:8000");
+    const server = createServer(params.server).listen();
+    logger.info(`RPC Server listening on port ${params.server.port}`);
+    logger.info(`OpenTrader UI: http://localhost:${params.server.port}`);
 
     return new Daemon(platform, server);
   }
@@ -54,3 +58,5 @@ export class Daemon {
     logger.info("Processor shutted down gracefully.");
   }
 }
+
+export { tServer } from "./trpc.js";

@@ -1,6 +1,11 @@
 import { Daemon } from "@opentrader/daemon";
 
-const daemon = await Daemon.create();
+const daemon = await Daemon.create({
+  server: {
+    frontendDistPath: "../frontend",
+    port: 8000,
+  },
+});
 
 async function shutdown() {
   await daemon.shutdown();

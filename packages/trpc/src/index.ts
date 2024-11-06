@@ -17,4 +17,4 @@
  */
 export { trpc } from "./trpc.js";
 export { type AppRouter, appRouter } from "./routers/appRouter.js";
-export { createContext } from "./utils/context.js";
+export { createContext, type Context } from "./utils/context.js";

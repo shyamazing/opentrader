@@ -17,7 +17,7 @@ export class Platform {
   private unsubscribeFromEventBus = () => {};
   private enabledBots: TBotWithExchangeAccount[] = [];
 
-  constructor(exchangeAccounts: ExchangeAccountWithCredentials[], bots: TBotWithExchangeAccount[]) {
+  constructor(exchangeAccounts: ExchangeAccountWithCredentials[]) {
     this.ordersConsumer = new OrdersStream(exchangeAccounts);
 
     this.marketStream = new MarketsStream(this.enabledBots);
