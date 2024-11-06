@@ -34,9 +34,6 @@ jobs:
           push: true
           tags: opentrader/opentrader:latest
           build-args: |
-            NEXT_PUBLIC_PROCESSOR_URL=https://dev.opentrader.dev
-            NEXT_PUBLIC_PROCESSOR_ENABLE_TRPC=true
-            NEXT_PUBLIC_STATIC=true
             ADMIN_PASSWORD=password
             GITHUB_TOKEN=${{ secrets.PRO_GITHUB_TOKEN }}
           # For pull requests, export results to the build cache.
