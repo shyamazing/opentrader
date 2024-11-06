@@ -25,6 +25,6 @@
   "dependencies": {
     "@opentrader/db": "workspace:*",
     "@opentrader/tools": "workspace:*",
-    "ccxt": "4.3.89"
+    "ccxt": "4.4.27"
   }
 }

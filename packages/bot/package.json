@@ -29,7 +29,7 @@
     "@opentrader/processing": "workspace:*",
     "@opentrader/tools": "workspace:*",
     "async": "^3.2.6",
-    "ccxt": "4.3.89",
+    "ccxt": "4.4.27",
     "cron": "^3.1.7"
   }
 }
