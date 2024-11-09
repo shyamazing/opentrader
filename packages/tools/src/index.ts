@@ -16,6 +16,7 @@
  * Repository URL: https://github.com/bludnic/opentrader
  */
 export * from "./grid/index.js";
+export * from "./dca/index.js";
 export * from "./symbolId/index.js";
 export * from "./symbol/index.js";
 export * from "./candlesticks/index.js";
