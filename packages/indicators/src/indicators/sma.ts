@@ -41,7 +41,7 @@ export async function sma(
   }
 
   if (candles.length < 1) {
-    throw new IndicatorError("No candles provided", "SMA");
+    throw new IndicatorError("No candles provided for SMA", "SMA");
   }
 
   const indicatorValues = SMA.calculate({

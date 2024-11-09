@@ -41,7 +41,7 @@ export async function ema(
   }
 
   if (candles.length < 1) {
-    throw new IndicatorError("No candles provided", "EMA");
+    throw new IndicatorError("No candles provided for EMA", "EMA");
   }
 
   const indicatorValues = EMA.calculate({

@@ -24,7 +24,7 @@ describe("sma", () => {
   });
 
   it("should throw an error if no candles are provided", async () => {
-    await expect(sma({ periods: 14 }, [])).rejects.toThrow("No candles provided");
+    await expect(sma({ periods: 14 }, [])).rejects.toThrow("No candles provided for SMA");
   });
 
   it("the length of SMA values must be equal to the number of candles", async () => {

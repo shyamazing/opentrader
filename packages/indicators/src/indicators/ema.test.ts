@@ -24,7 +24,7 @@ describe("ema", () => {
   });
 
   it("should throw an error if no candles are provided", async () => {
-    await expect(ema({ periods: 14 }, [])).rejects.toThrow("No candles provided");
+    await expect(ema({ periods: 14 }, [])).rejects.toThrow("No candles provided for EMA");
   });
 
   it("the length of EMA values must be equal to the number of candles", async () => {

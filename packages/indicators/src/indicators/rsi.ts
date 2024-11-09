@@ -41,7 +41,7 @@ export async function rsi(
   }
 
   if (candles.length < 1) {
-    throw new IndicatorError("No candles provided", "RSI");
+    throw new IndicatorError("No candles provided for RSI", "RSI");
   }
 
   const rsiValues = RSI.calculate({

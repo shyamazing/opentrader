@@ -24,7 +24,7 @@ describe("rsi", () => {
   });
 
   it("should throw an error if no candles provided", async () => {
-    await expect(rsi({ periods: 14 }, [])).rejects.toThrow("No candles provided");
+    await expect(rsi({ periods: 14 }, [])).rejects.toThrow("No candles provided for RSI");
   });
 
   it("the length of RSI values must be equal to the number of candles", async () => {
