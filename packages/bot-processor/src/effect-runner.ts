@@ -15,11 +15,12 @@
  *
  * Repository URL: https://github.com/bludnic/opentrader
  */
-import { rsi } from "@opentrader/indicators";
+import { rsi, ema, sma } from "@opentrader/indicators";
+import { aggregateCandles, IndicatorsValues } from "@opentrader/tools";
 import { OrderStatusEnum, OrderType, XEntityType, XOrderSide } from "@opentrader/types";
 import { TradeService, SmartTradeService } from "./types/index.js";
 import type { TBotContext } from "./types/index.js";
-import { BaseEffect, EffectType, USE_DCA } from "./effects/types/index.js";
+import { BaseEffect, EffectType, USE_DCA, USE_INDICATOR } from "./effects/types/index.js";
 import {
   buy,
   useTrade,
@@ -35,6 +36,8 @@ import {
   useCandle,
   useRSI,
   useDca,
+  useIndicator,
+  useIndicators,
 } from "./effects/index.js";
 import {
   BUY,
@@ -68,9 +71,8 @@ export const effectRunnerMap: Record<
   [BUY]: runBuyEffect,
   [SELL]: runSellEffect,
   [USE_EXCHANGE]: runUseExchangeEffect,
-  [USE_INDICATORS]: () => {
-    throw new Error("useIndicators() hook is deprecated");
-  },
+  [USE_INDICATOR]: runUseIndicatorEffect,
+  [USE_INDICATORS]: runUseIndicatorsEffect,
   [USE_MARKET]: runUseMarketEffect,
   [USE_CANDLE]: runUseCandleEffect,
   [USE_RSI_INDICATOR]: runUseRsiIndicatorEffect,
@@ -348,6 +350,66 @@ async function runUseCandleEffect(effect: ReturnType<typeof useCandle>, ctx: TBo
   }
 
   return ctx.market.candles[ctx.market.candles.length + index];
+}
+
+async function runUseIndicatorEffect(
+  effect: ReturnType<typeof useIndicator>,
+  ctx: TBotContext<any>,
+): Promise<number[]> {
+  const { name, barSize, options } = effect.payload;
+
+  if (ctx.market.candles.length === 0) {
+    console.warn(`[useIndicator] Candles are empty. Skipping ${name} calculation.`);
+
+    return [];
+  }
+
+  switch (name) {
+    case "RSI":
+      return rsi(options, aggregateCandles(ctx.market.candles, barSize));
+    case "SMA":
+      return sma(options, aggregateCandles(ctx.market.candles, barSize));
+    case "EMA":
+      return ema(options, aggregateCandles(ctx.market.candles, barSize));
+    default:
+      console.warn(`[useIndicator] Unsupported indicator ${name}`);
+      return [];
+  }
+}
+
+async function runUseIndicatorsEffect(
+  effect: ReturnType<typeof useIndicators>,
+  ctx: TBotContext<any>,
+): Promise<IndicatorsValues> {
+  const indicators = effect.payload;
+
+  const result: IndicatorsValues = {};
+
+  for (const [name, timeframe, options] of indicators) {
+    let values: number[] = [];
+
+    switch (name) {
+      case "RSI":
+        values = await rsi(options, aggregateCandles(ctx.market.candles, timeframe));
+        break;
+      case "SMA":
+        values = await sma(options, aggregateCandles(ctx.market.candles, timeframe));
+        break;
+      case "EMA":
+        values = await ema(options, aggregateCandles(ctx.market.candles, timeframe));
+        break;
+      default:
+        console.warn(`[useIndicators] Unsupported indicator ${name}`);
+        break;
+    }
+
+    if (!result[name]) result[name] = {};
+    if (!result[name][timeframe]) result[name][timeframe] = {};
+
+    result[name][timeframe][JSON.stringify(options)] = values.at(-1)!;
+  }
+
+  return result;
 }
 
 async function runUseRsiIndicatorEffect(effect: ReturnType<typeof useRSI>, ctx: TBotContext<any>): Promise<number> {
