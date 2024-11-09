@@ -23,9 +23,9 @@
 
 - [x] [Grid](packages/bot-templates/src/templates/grid-bot.ts): A grid trading strategy that profits from the price fluctuation of an asset.
 - [x] [RSI](packages/bot-templates/src/templates/rsi.ts): A Relative Strength Index (RSI) strategy that buys and sells based on the RSI indicator.
-- [ ] `DCA`: Dollar-Cost Averaging (DCA) strategy that buys an asset at regular intervals.
+- [x] `DCA`: Dollar-Cost Averaging (DCA) strategy that buys an asset at regular intervals.
 - [ ] `ARB`: Arbitrage strategy that takes advantage of price differences through cross-exchange trading.
-- [ ] `CUSTOM`: Build your own strategy in just a few lines of code
+- [x] `CUSTOM`: Build your own strategy in just a few lines of code
 
 # 🤖 State of the Project
 
@@ -100,7 +100,7 @@ Create the strategy configuration file `config.json5`. We will use the `grid` st
 }
 ```
 
-> Currently supported strategies: `grid`, `rsi`
+> Currently supported strategies: `grid`, `dca`, `rsi`
 
 ### Run a backtest
 
