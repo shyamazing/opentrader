@@ -29,9 +29,9 @@ export function evaluateConditions(entryConditions: RuleGroupType, indicators: I
           continue;
         }
 
-        console.log(
-          `Evaluate ${rule.field} ${rule.value.timeframe}: ${indicatorValue} ${rule.operator} ${rule.value.indicatorValue} -> ${evaluate(rule.operator, indicatorValue, Number(rule.value.indicatorValue))}`,
-        );
+        // console.log(
+        //   `Evaluate ${rule.field} ${rule.value.timeframe}: ${indicatorValue} ${rule.operator} ${rule.value.indicatorValue} -> ${evaluate(rule.operator, indicatorValue, Number(rule.value.indicatorValue))}`,
+        // );
         expressions.push(evaluate(rule.operator, indicatorValue, Number(rule.value.indicatorValue)));
       } else {
         // for non-indicator conditions
