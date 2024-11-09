@@ -24,7 +24,7 @@ export interface BotTemplate<T extends IBotConfiguration> {
    * Number of candles the strategy requires for warm-up.
    * When the bot starts, it will download the required number of candles.
    */
-  requiredHistory?: number;
+  requiredHistory?: number | ((botConfig: T) => number | undefined);
   /**
    * Used to aggregate 1m candles to a higher timeframe, when using candles watcher.
    * If not provided, the timeframe from the bot config will be used.

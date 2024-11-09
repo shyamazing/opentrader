@@ -58,3 +58,22 @@ export function getWatchers(strategyFn: BotTemplate<any>, bot: TBotWithExchangeA
     [Watcher.watchCandles]: extractSymbols(strategyFn.watchers[Watcher.watchCandles], bot),
   };
 }
+
+export function getRequiredHistory(
+  strategyFn: BotTemplate<IBotConfiguration>,
+  bot: TBotWithExchangeAccount,
+): number | undefined {
+  const { requiredHistory } = strategyFn;
+
+  if (typeof requiredHistory === "function") {
+    return requiredHistory({
+      id: bot.id,
+      symbol: bot.symbol,
+      settings: bot.settings,
+      timeframe: bot.timeframe as BarSize | null,
+      exchangeCode: bot.exchangeAccount.exchangeCode as ExchangeCode,
+    });
+  }
+
+  return requiredHistory;
+}

@@ -2,7 +2,7 @@ import { EventEmitter } from "node:events";
 import { exchangeProvider } from "@opentrader/exchanges";
 import { logger } from "@opentrader/logger";
 import type { TBotWithExchangeAccount } from "@opentrader/db";
-import { getWatchers, getTimeframe } from "@opentrader/processing";
+import { getWatchers, getTimeframe, getRequiredHistory } from "@opentrader/processing";
 import { decomposeSymbolId } from "@opentrader/tools";
 import { BarSize, ExchangeCode } from "@opentrader/types";
 import { findStrategy } from "@opentrader/bot-templates/server";
@@ -37,6 +37,7 @@ export class CandlesStream extends EventEmitter {
   async addBot(bot: TBotWithExchangeAccount) {
     const { strategyFn } = findStrategy(bot.template);
     const { watchCandles: symbols } = getWatchers(strategyFn, bot);
+    const requiredHistory = getRequiredHistory(strategyFn, bot);
 
     const timeframe = getTimeframe(strategyFn, bot);
     if (!timeframe) {
@@ -50,7 +51,7 @@ export class CandlesStream extends EventEmitter {
       const { exchangeCode, currencyPairSymbol: symbol } = decomposeSymbolId(symbolId);
 
       const channel = this.getChannel(exchangeCode);
-      await channel.add(symbol, timeframe, strategyFn.requiredHistory);
+      await channel.add(symbol, timeframe, requiredHistory);
       logger.info(
         `[CandlesProcessor]: Subscribed bot [${bot.id}:"${bot.name}"] to the ${exchangeCode}:${symbol} channel`,
       );
