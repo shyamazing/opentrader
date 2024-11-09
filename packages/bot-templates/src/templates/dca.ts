@@ -54,26 +54,20 @@ dca.displayName = "DCA Bot";
 dca.hidden = true;
 dca.schema = z.object({
   entry: z.object({
-    quantity: z.number().positive().describe("Quantity of the Entry Order in base currency").default(0.001),
-    type: z.nativeEnum(XOrderType).describe("Entry with Limit or Market order").default(XOrderType.Market),
+    quantity: z.number().positive().describe("Quantity of the Entry Order in base currency"),
+    type: z.nativeEnum(XOrderType).describe("Entry with Limit or Market order"),
     price: z.number().optional(),
     conditions: z.any().optional(), // @todo schema validation
   }),
   tp: z.object({
-    percent: z.number().positive().describe("Take Profit from entry order price in %").default(3),
+    percent: z.number().positive().describe("Take Profit from entry order price in %"),
   }),
-  safetyOrders: z
-    .array(
-      z.object({
-        quantity: z.number().positive().positive("Quantity of the Safety Order in base currency"),
-        priceDeviation: z.number().positive().positive("Price deviation from the Entry Order price in %"),
-      }),
-    )
-    .default([
-      { quantity: 0.002, priceDeviation: 1 },
-      { quantity: 0.003, priceDeviation: 2 },
-      { quantity: 0.004, priceDeviation: 3 },
-    ]),
+  safetyOrders: z.array(
+    z.object({
+      quantity: z.number().positive().positive("Quantity of the Safety Order in base currency"),
+      priceDeviation: z.number().positive().positive("Price deviation from the Entry Order price in %"),
+    }),
+  ),
 });
 
 dca.runPolicy = {
