@@ -31,7 +31,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "postinstall": "pnpm link --global",
     "release": "moon run :build && moon run :dts && ./scripts/release.mjs",
-    "ui:sync": "moon run frontend:build && cp -r pro/frontend/dist apps/cli/frontend && git add apps/cli/frontend",
+    "ui:sync": "moon run frontend:build && rm -rf apps/cli/frontend && cp -r pro/frontend/dist apps/cli/frontend && git add apps/cli/frontend",
     "debug": "ts-node --transpile-only packages/cli/src/index.ts trade debug"
   },
   "bin": {
