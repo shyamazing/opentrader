@@ -12,11 +12,11 @@
     "@opentrader/eslint": "workspace:*",
     "@opentrader/tsconfig": "workspace:*",
     "@opentrader/types": "workspace:*",
-    "@types/node": "^20.16.5",
+    "@types/node": "^20.17.6",
     "eslint": "8.57.0",
     "ts-node": "10.9.2",
     "typescript": "5.5.4",
-    "vitest": "^2.0.5"
+    "vitest": "^2.1.4"
   },
   "dependencies": {
     "technicalindicators": "^3.1.0"

@@ -12,13 +12,13 @@
     "@opentrader/tsconfig": "workspace:*",
     "@types/big.js": "^6.2.2",
     "eslint": "8.57.0",
-    "react-querybuilder": "^7.7.0",
-    "tsup": "^8.2.4",
+    "react-querybuilder": "^7.7.1",
+    "tsup": "^8.3.5",
     "typescript": "5.5.4",
-    "vitest": "^2.0.5"
+    "vitest": "^2.1.4"
   },
   "dependencies": {
     "@opentrader/types": "workspace:*",
-    "big.js": "^6.2.1"
+    "big.js": "^6.2.2"
   }
 }
