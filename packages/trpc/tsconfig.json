@@ -63,6 +63,18 @@
       ],
       "@opentrader/types/*": [
         "../types/src/*"
+      ],
+      "@opentrader/backtesting": [
+        "../backtesting/src/index.ts"
+      ],
+      "@opentrader/backtesting/*": [
+        "../backtesting/src/*"
+      ],
+      "@opentrader/bot": [
+        "../bot/src/index.ts"
+      ],
+      "@opentrader/bot/*": [
+        "../bot/src/*"
       ]
     }
   },
@@ -70,6 +82,12 @@
     "src/**/*"
   ],
   "references": [
+    {
+      "path": "../backtesting"
+    },
+    {
+      "path": "../bot"
+    },
     {
       "path": "../bot-processor"
     },

@@ -725,6 +725,12 @@ importers:
 
   packages/trpc:
     dependencies:
+      '@opentrader/backtesting':
+        specifier: workspace:*
+        version: link:../backtesting
+      '@opentrader/bot':
+        specifier: workspace:*
+        version: link:../bot
       '@opentrader/bot-processor':
         specifier: workspace:*
         version: link:../bot-processor

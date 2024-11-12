@@ -12,6 +12,8 @@ import { ZUpdateBotInputSchema } from "./update-bot/schema.js";
 import { startGridBot } from "./start-bot/handler.js";
 import { ZStartGridBotInputSchema } from "./start-bot/schema.js";
 import { stopGridBot } from "./stop-bot/handler.js";
+import { backtest } from "./backtest/handler.js";
+import { ZBacktestInputSchema } from "./backtest/schema.js";
 import { ZStopGridBotInputSchema } from "./stop-bot/schema.js";
 import { manualProcessGridBot } from "./manual-process/handler.js";
 import { ZManualProcessGridBotInputSchema } from "./manual-process/schema.js";
@@ -41,6 +43,7 @@ export const botRouter = router({
   update: authorizedProcedure.input(ZUpdateBotInputSchema).mutation(updateBot),
   start: authorizedProcedure.input(ZStartGridBotInputSchema).mutation(startGridBot),
   stop: authorizedProcedure.input(ZStopGridBotInputSchema).mutation(stopGridBot),
+  backtest: authorizedProcedure.input(ZBacktestInputSchema).mutation(backtest),
   manualProcess: authorizedProcedure.input(ZManualProcessGridBotInputSchema).mutation(manualProcessGridBot),
   cronPlaceLimitOrders: authorizedProcedure.input(ZCronPlacePendingOrdersInputSchema).mutation(cronPlacePendingOrders),
   syncOrders: authorizedProcedure.input(ZSyncGridBotOrdersInputSchema).mutation(syncOrders),
