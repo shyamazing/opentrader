@@ -28,7 +28,7 @@
     "@opentrader/processing": "workspace:*",
     "@opentrader/tools": "workspace:*",
     "@trpc/server": "^10.45.2",
-    "ccxt": "4.4.27",
+    "ccxt": "4.4.29",
     "superjson": "^2.2.1",
     "zod": "3.23.8",
     "zod-to-json-schema": "^3.23.5"
