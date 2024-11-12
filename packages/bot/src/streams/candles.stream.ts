@@ -69,7 +69,7 @@ export class CandlesStream extends EventEmitter {
       channel = new CandlesChannel(exchange);
       this.channels.push(channel);
 
-      logger.info(`[CandlesConsumer] Created ${exchangeCode} channel`);
+      logger.debug(`[CandlesConsumer] Created ${exchangeCode} channel`);
 
       // @todo type
       channel.on("candle", this.handleCandle);

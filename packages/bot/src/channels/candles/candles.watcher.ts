@@ -27,7 +27,7 @@ export class CandlesWatcher extends EventEmitter {
     }
 
     this.enabled = true;
-    logger.info(`[CandlesWatcher] Watcher on ${this.exchange.exchangeCode}:${this.symbol} was enabled`);
+    logger.debug(`[CandlesWatcher] Watcher on ${this.exchange.exchangeCode}:${this.symbol} was enabled`);
     void this.watch();
   }
 

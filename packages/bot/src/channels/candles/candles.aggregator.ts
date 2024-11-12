@@ -70,7 +70,7 @@ export class CandlesAggregator extends EventEmitter {
 
     const lastCandle = this.bucket[this.bucket.length - 1];
     if (candle.timestamp < lastCandle?.timestamp) {
-      logger.info(
+      logger.debug(
         `[${this.symbol}#${this.timeframe}] Candle timestamp ${new Date(candle.timestamp).toISOString()} is older than last candle (${new Date(lastCandle.timestamp).toISOString()}) in the bucket. Skipping.`,
       );
 
@@ -116,7 +116,7 @@ export class CandlesAggregator extends EventEmitter {
 
     const isFirstCandle = candle.timestamp % (this.bucketSize * 60000) === 0;
     if (this.bucket.length > 0 || isFirstCandle) {
-      logger.info(
+      logger.debug(
         `[${this.symbol}#${this.timeframe}] Pushed ${isFirstCandle ? "first " : ""}candle ${new Date(candle.timestamp).toISOString()}. Bucket length is ${this.bucket.length}/${this.bucketSize}`,
       );
 
@@ -136,7 +136,7 @@ export class CandlesAggregator extends EventEmitter {
       const candle = this.aggregate();
       this.candlesHistory.push(candle);
 
-      logger.info(
+      logger.debug(
         `[${this.symbol}#${this.timeframe}] Aggregated candle: O: ${candle.open}, H: ${candle.high}, L: ${candle.low}, C: ${candle.close} at ${new Date(candle.timestamp).toISOString()}`,
       );
       this.emit("candle", candle, this.candlesHistory);
@@ -203,7 +203,7 @@ export class CandlesAggregator extends EventEmitter {
     let since = lastClosedCandleTimestamp;
     let done = false;
 
-    logger.info(
+    logger.debug(
       `[${this.symbol}#${this.timeframe}] Downloading ${this.symbol} ${this.timeframe} history candles from ${new Date(since).toISOString()}`,
     );
 
@@ -232,7 +232,7 @@ export class CandlesAggregator extends EventEmitter {
 
     const firstCandle = minuteCandles[0];
     const lastCandle = minuteCandles[minuteCandles.length - 1];
-    logger.info(
+    logger.debug(
       `[${this.symbol}#${this.timeframe}] Downloaded history candles from ${firstCandle ? new Date(firstCandle.timestamp).toISOString() : null} to ${lastCandle ? new Date(lastCandle.timestamp).toISOString() : null}`,
     );
 
@@ -243,7 +243,7 @@ export class CandlesAggregator extends EventEmitter {
       this.candlesHistory.push(candle);
     }
 
-    logger.info(
+    logger.debug(
       {
         candlesHistory: this.candlesHistory.map((candle) => new Date(candle.timestamp).toISOString()),
         bucket: this.bucket.map((candle) => new Date(candle.timestamp).toISOString()),
@@ -291,14 +291,14 @@ export class CandlesAggregator extends EventEmitter {
 
     let firstCandle = minuteCandles[0];
     let lastCandle = minuteCandles[minuteCandles.length - 1];
-    logger.info(
+    logger.debug(
       `[${this.symbol}#${this.timeframe}] Downloaded candles from ${firstCandle ? new Date(firstCandle.timestamp).toISOString() : null} to ${lastCandle ? new Date(lastCandle.timestamp).toISOString() : null}`,
     );
     minuteCandles = minuteCandles.filter((candle) => candle.timestamp < lastClosedCandleTimestamp);
 
     firstCandle = minuteCandles[0];
     lastCandle = minuteCandles[minuteCandles.length - 1];
-    logger.info(
+    logger.debug(
       `[${this.symbol}#${this.timeframe}] Filtered candles from ${firstCandle ? new Date(firstCandle.timestamp).toISOString() : null} to ${lastCandle ? new Date(lastCandle.timestamp).toISOString() : null} (length: ${minuteCandles.length})`,
     );
 

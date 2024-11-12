@@ -1,8 +1,5 @@
 import { OrderNotFound } from "ccxt";
-import type {
-  ExchangeAccountWithCredentials,
-  OrderWithSmartTrade,
-} from "@opentrader/db";
+import type { ExchangeAccountWithCredentials, OrderWithSmartTrade } from "@opentrader/db";
 import { xprisma } from "@opentrader/db";
 import { exchangeProvider, type IExchange } from "@opentrader/exchanges";
 import type { IGetLimitOrderResponse, XOrderStatus } from "@opentrader/types";
@@ -12,22 +9,15 @@ import { toDbStatus } from "../utils/index.js";
 type SymbolId = string;
 
 type SyncOrdersParams = {
-  onFilled?: (
-    exchangeOrder: IGetLimitOrderResponse,
-    order: OrderWithSmartTrade,
-  ) => void;
-  onCanceled?: (
-    exchangeOrder: IGetLimitOrderResponse,
-    order: OrderWithSmartTrade,
-  ) => void;
+  onFilled?: (exchangeOrder: IGetLimitOrderResponse, order: OrderWithSmartTrade) => void;
+  onCanceled?: (exchangeOrder: IGetLimitOrderResponse, order: OrderWithSmartTrade) => void;
 };
 
 export class ExchangeAccountProcessor {
   private exchangeAccount: ExchangeAccountWithCredentials;
   private exchange: IExchange;
 
-  private cachedOrders: Partial<Record<SymbolId, IGetLimitOrderResponse[]>> =
-    {};
+  private cachedOrders: Partial<Record<SymbolId, IGetLimitOrderResponse[]>> = {};
 
   constructor(exchangeAccount: ExchangeAccountWithCredentials) {
     this.exchangeAccount = exchangeAccount;
@@ -63,12 +53,11 @@ export class ExchangeAccountProcessor {
     }
 
     logger.info(
-      `ExchangeAccountProcessor: Preparing ${orders.length} orders for synchronization`,
+      `[${this.exchangeAccount.exchangeCode} | ${this.exchangeAccount.name}]: Preparing ${orders.length} orders for synchronization`,
     );
 
     for (const order of orders) {
-      const { statusChanged, newStatus, exchangeOrder } =
-        await this.fetchExchangeOrder(order);
+      const { statusChanged, newStatus, exchangeOrder } = await this.fetchExchangeOrder(order);
 
       if (statusChanged) {
         await this.updateStatus(order, exchangeOrder, newStatus);
@@ -86,9 +75,7 @@ export class ExchangeAccountProcessor {
     }
 
     return {
-      affectedBotsIds: affectedBotsIds.filter(
-        (value, index, array) => array.indexOf(value) === index,
-      ),
+      affectedBotsIds: affectedBotsIds.filter((value, index, array) => array.indexOf(value) === index),
     };
   }
 
@@ -117,11 +104,7 @@ export class ExchangeAccountProcessor {
     }
   }
 
-  private async updateStatus(
-    order: OrderWithSmartTrade,
-    exchangeOrder: IGetLimitOrderResponse,
-    status: XOrderStatus,
-  ) {
+  private async updateStatus(order: OrderWithSmartTrade, exchangeOrder: IGetLimitOrderResponse, status: XOrderStatus) {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check -- "Idle" | "Placed" | "Revoked" doesn't require to be processed
     switch (status) {
       case "Filled":
@@ -131,9 +114,7 @@ export class ExchangeAccountProcessor {
           filledAt: new Date(exchangeOrder.lastTradeTimestamp),
           fee: exchangeOrder.fee,
         });
-        logger.info(
-          `        -> Filled with price ${exchangeOrder.filledPrice} and fee ${exchangeOrder.fee}`,
-        );
+        logger.info(`        -> Filled with price ${exchangeOrder.filledPrice} and fee ${exchangeOrder.fee}`);
 
         return;
       case "Canceled":
@@ -144,9 +125,7 @@ export class ExchangeAccountProcessor {
       case "Deleted":
         await xprisma.order.updateStatus("Deleted", order.id);
 
-        logger.info(
-          `        Order not found on the exchange. Status updated to "Deleted"`,
-        );
+        logger.info(`        Order not found on the exchange. Status updated to "Deleted"`);
     }
   }
 
@@ -172,10 +151,7 @@ export class ExchangeAccountProcessor {
     const { symbol } = order.smartTrade;
 
     const cachedOrders = await this.getOrders(symbol);
-    const cachedOrder = cachedOrders.find(
-      (exchangeOrder) =>
-        exchangeOrder.exchangeOrderId === order.exchangeOrderId,
-    );
+    const cachedOrder = cachedOrders.find((exchangeOrder) => exchangeOrder.exchangeOrderId === order.exchangeOrderId);
 
     return cachedOrder;
   }
@@ -186,18 +162,18 @@ export class ExchangeAccountProcessor {
       return cachedOrders;
     }
 
-    logger.info(`Fetching open orders of ${symbol} symbol`);
+    logger.debug(`Fetching open orders of ${symbol} symbol`);
     const openOrders = await this.exchange.getOpenOrders({
       symbol,
     });
 
-    logger.info(`Fetching closed orders of ${symbol} symbol`);
+    logger.debug(`Fetching closed orders of ${symbol} symbol`);
     const closedOrders = await this.exchange.getClosedOrders({
       symbol,
     });
 
     logger.info(
-      `Open Orders: ${openOrders.length}: Closed Orders: ${closedOrders.length}`,
+      `[${this.exchangeAccount.exchangeCode} | ${this.exchangeAccount.name}] Open orders: ${openOrders.length}: Closed orders: ${closedOrders.length}`,
     );
     const orders = [...closedOrders, ...openOrders];
     this.cachedOrders[symbol] = orders;
