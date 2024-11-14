@@ -2,7 +2,6 @@ import { dirname, join } from "node:path";
 import { spawn } from "node:child_process";
 import { logger } from "@opentrader/logger";
 import type { CommandResult } from "../../types.js";
-import { appPath } from "../../utils/app-path.js";
 import { getPid, savePid } from "../../utils/pid.js";
 import { fileURLToPath } from "node:url";
 
@@ -24,7 +23,7 @@ export async function up(options: Options): Promise<CommandResult> {
   const pid = getPid();
 
   if (pid) {
-    logger.warn(`Daemon process is already running with PID: ${pid}`);
+    logger.warn(`OpenTrader already running [PID: ${pid}]`);
 
     return {
       result: undefined,
@@ -42,7 +41,7 @@ export async function up(options: Options): Promise<CommandResult> {
       });
 
   if (daemonProcess.pid === undefined) {
-    throw new Error("Failed to start daemon process");
+    throw new Error("OpenTrader process not started. PID is undefined.");
   }
 
   logger.debug(`OpenTrader daemon started with PID: ${daemonProcess.pid}`);
@@ -50,7 +49,7 @@ export async function up(options: Options): Promise<CommandResult> {
   if (options.detach) {
     daemonProcess.unref();
     savePid(daemonProcess.pid);
-    logger.info(`Daemon process detached and saved to ${appPath}`);
+    logger.info(`OpenTrader started as a daemon [PID: ${daemonProcess.pid}]`);
   } else {
     daemonProcess.stdout?.pipe(process.stdout);
     daemonProcess.stderr?.pipe(process.stderr);

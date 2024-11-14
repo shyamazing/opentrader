@@ -10,7 +10,7 @@ export async function down(options: Options): Promise<CommandResult> {
   const pid = getPid();
 
   if (!pid) {
-    logger.warn("There is no running daemon process. Nothing to stop.");
+    logger.warn("OpenTrader already stopped.");
     return {
       result: undefined,
     };
@@ -19,17 +19,13 @@ export async function down(options: Options): Promise<CommandResult> {
   try {
     if (options.force) {
       process.kill(pid, "SIGKILL");
-      logger.info(
-        `Daemon process with PID ${pid} has been forcefully stopped.`,
-      );
+      logger.info(`OpenTrader has been forcefully stopped [PID: ${[pid]}]`);
     } else {
       process.kill(pid, "SIGTERM");
-      logger.info(
-        `Daemon process with PID ${pid} has been gracefully stopped.`,
-      );
+      logger.warn(`OpenTrader has been gracefully stopped [PID: ${[pid]}]`);
     }
   } catch (err) {
-    logger.info(`Failed to stop daemon process with PID ${pid}`);
+    logger.warn(`Failed to stop OpenTrader process [PID: ${pid}]. Retry with: opentrader down --force`);
     logger.error(err);
   }
 
