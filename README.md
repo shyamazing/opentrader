@@ -21,9 +21,9 @@
 
 **Strategies:**
 
-- [x] [Grid](packages/bot-templates/src/templates/grid-bot.ts): A grid trading strategy that profits from the price fluctuation of an asset.
-- [x] [RSI](packages/bot-templates/src/templates/rsi.ts): A Relative Strength Index (RSI) strategy that buys and sells based on the RSI indicator.
-- [x] [DCA](packages/bot-templates/src/templates/dca.ts): Dollar-Cost Averaging (DCA) strategy that buys an asset at regular intervals.
+- [x] [Grid](packages/bot-templates/src/templates/grid-bot.ts): Make profits from market fluctuations by creating a grid of buy and sell orders.
+- [x] [DCA](packages/bot-templates/src/templates/dca.ts): Entry with multiple orders to average the entry price and sell on price swings.
+- [x] [RSI](packages/bot-templates/src/templates/rsi.ts): Places orders based on the RSI indicator value.
 - [ ] `ARB`: Arbitrage strategy that takes advantage of price differences through cross-exchange trading.
 - [x] [CUSTOM](https://github.com/Open-Trader/custom-strategy): Build your own strategy in just a few lines of code
 
