@@ -13,11 +13,11 @@
     "@opentrader/tsconfig": "workspace:*",
     "@opentrader/types": "workspace:*",
     "@types/async": "^3.2.24",
-    "@types/node": "^20.17.6",
+    "@types/node": "^20.17.10",
     "eslint": "8.57.0",
     "ts-node": "10.9.2",
     "typescript": "5.5.4",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.8"
   },
   "dependencies": {
     "@opentrader/bot-store": "workspace:*",
@@ -30,6 +30,6 @@
     "@opentrader/tools": "workspace:*",
     "async": "^3.2.6",
     "ccxt": "4.4.39",
-    "cron": "^3.1.9"
+    "cron": "^3.3.1"
   }
 }

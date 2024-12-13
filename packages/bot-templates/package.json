@@ -17,10 +17,10 @@
     "@opentrader/eslint": "workspace:*",
     "@opentrader/tsconfig": "workspace:*",
     "@opentrader/types": "workspace:*",
-    "@types/node": "^20.17.6",
+    "@types/node": "^20.17.10",
     "eslint": "8.57.0",
     "typescript": "5.5.4",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.8"
   },
   "dependencies": {
     "@opentrader/bot-processor": "workspace:*",
