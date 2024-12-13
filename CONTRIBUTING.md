@@ -1,10 +1,10 @@
 # Requirements
 
 ```bash
-# NodeJS v20 or higher
+# NodeJS v22.12 or higher
 node -v
 
-# `pnpm` must be installed
+# PNPM v9.15 or higher
 pnpm -v
 
 # `moonrepo` must be installed

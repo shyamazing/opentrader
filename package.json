@@ -9,12 +9,14 @@
     "pro/*"
   ],
   "engines": {
-    "node": "20.18.0"
+    "node": "~22.12"
   },
-  "packageManager": "pnpm@9.12.0",
+  "bin": {
+    "dev": "./bin/dev.sh",
+    "cli": "./bin/cli.sh"
+  },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
-    "@moonrepo/cli": "^1.30.5",
     "execa": "^9.5.2",
     "prettier": "^3.4.2",
     "resolve-tspaths": "^0.8.23",
@@ -33,9 +35,5 @@
     "release": "moon run :build && moon run :dts && ./scripts/release.mjs",
     "ui:sync": "moon run frontend:build && rm -rf apps/cli/frontend && cp -r pro/frontend/dist apps/cli/frontend && git add apps/cli/frontend",
     "debug": "ts-node --transpile-only packages/cli/src/index.ts trade debug"
-  },
-  "bin": {
-    "dev": "./bin/dev.sh",
-    "cli": "./bin/cli.sh"
   }
 }
