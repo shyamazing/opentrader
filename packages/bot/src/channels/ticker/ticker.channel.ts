@@ -43,7 +43,7 @@ export class TickerChannel extends EventEmitter {
 
       this.watchers.push(watcher);
     } else {
-      logger.info(`[TickerChannel] Watcher on ${this.exchange.exchangeCode}:${symbol} already exists. Reusing it.`);
+      logger.debug(`[TickerChannel] Watcher on ${this.exchange.exchangeCode}:${symbol} already exists. Reusing it.`);
     }
 
     watcher.enable();
@@ -67,7 +67,7 @@ export class TickerChannel extends EventEmitter {
     }
     this.watchers = [];
 
-    logger.info(`[TickerChannel] Channel for ${this.exchange.exchangeCode} destroyed`);
+    logger.debug(`[TickerChannel] Channel for ${this.exchange.exchangeCode} destroyed`);
   }
 
   getWatchers() {

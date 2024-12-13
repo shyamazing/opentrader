@@ -99,7 +99,7 @@ export class CandlesStream extends EventEmitter {
       // Clean stale channels
       const isChannelUsedByAnyBot = botsInUse.some((bot) => bot.exchangeCodes.includes(channel.exchangeCode));
       if (!isChannelUsedByAnyBot) {
-        logger.info(`[CandlesProcessor] Removing stale channel ${channel.exchangeCode}`);
+        logger.debug(`[CandlesProcessor] Removing stale channel ${channel.exchangeCode}`);
         this.removeChannel(channel);
         continue; // no need to check watchers and aggregators
       }
@@ -111,7 +111,7 @@ export class CandlesStream extends EventEmitter {
         );
 
         if (!isWatcherUsedByAnyBot) {
-          logger.info(`[CandlesProcessor] Removing stale watcher ${channel.exchangeCode}:${watcher.symbol}`);
+          logger.debug(`[CandlesProcessor] Removing stale watcher ${channel.exchangeCode}:${watcher.symbol}`);
           channel.removeWatcher(watcher);
         }
       }

@@ -60,7 +60,7 @@ export class CandlesChannel extends EventEmitter {
 
       this.watchers.push(watcher);
     } else {
-      logger.info(
+      logger.debug(
         `[CandlesChannel] Watcher on ${this.exchange.exchangeCode}:${symbol} already exists. Reusing it for ${timeframe} aggregation`,
       );
     }
@@ -102,7 +102,7 @@ export class CandlesChannel extends EventEmitter {
     }
     this.aggregators = [];
 
-    logger.info(`[CandlesChannel] Candles channel for ${this.exchange.exchangeCode} destroyed`);
+    logger.debug(`[CandlesChannel] Candles channel for ${this.exchange.exchangeCode} destroyed`);
   }
 
   getWatchers() {

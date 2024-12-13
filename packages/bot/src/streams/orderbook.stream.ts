@@ -90,7 +90,7 @@ export class OrderbookStream extends EventEmitter {
       // Clean stale channels
       const isChannelUsedByAnyBot = botsInUse.some((bot) => bot.exchangeCodes.includes(channel.exchangeCode));
       if (!isChannelUsedByAnyBot) {
-        logger.info(`[OrderbookConsumer] Removing stale channel ${channel.exchangeCode}`);
+        logger.debug(`[OrderbookConsumer] Removing stale channel ${channel.exchangeCode}`);
         this.removeChannel(channel);
         continue; // no need to check watchers
       }
@@ -102,7 +102,7 @@ export class OrderbookStream extends EventEmitter {
         );
 
         if (!isWatcherUsedByAnyBot) {
-          logger.info(`[OrderbookConsumer] Removing stale watcher ${channel.exchangeCode}:${watcher.symbol}`);
+          logger.debug(`[OrderbookConsumer] Removing stale watcher ${channel.exchangeCode}:${watcher.symbol}`);
           channel.removeWatcher(watcher);
         }
       }

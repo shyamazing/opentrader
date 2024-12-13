@@ -43,7 +43,7 @@ export class OrderbookChannel extends EventEmitter {
 
       this.watchers.push(watcher);
     } else {
-      logger.info(`[OrderbookChannel] Watcher on ${this.exchange.exchangeCode}:${symbol} already exists. Reusing it.`);
+      logger.debug(`[OrderbookChannel] Watcher on ${this.exchange.exchangeCode}:${symbol} already exists. Reusing it.`);
     }
 
     watcher.enable();
@@ -67,7 +67,7 @@ export class OrderbookChannel extends EventEmitter {
     }
     this.watchers = [];
 
-    logger.info(`[OrderbookChannel] Orderbook channel for ${this.exchange.exchangeCode} destroyed`);
+    logger.debug(`[OrderbookChannel] Orderbook channel for ${this.exchange.exchangeCode} destroyed`);
   }
 
   getWatchers() {

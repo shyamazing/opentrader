@@ -82,7 +82,7 @@ export class TradesStream extends EventEmitter {
       // Clean stale channels
       const isChannelUsedByAnyBot = botsInUse.some((bot) => bot.exchangeCodes.includes(channel.exchangeCode));
       if (!isChannelUsedByAnyBot) {
-        logger.info(`[TradesConsumer] Removing stale channel ${channel.exchangeCode}`);
+        logger.debug(`[TradesConsumer] Removing stale channel ${channel.exchangeCode}`);
         this.removeChannel(channel);
         continue; // no need to check watchers
       }
@@ -94,7 +94,7 @@ export class TradesStream extends EventEmitter {
         );
 
         if (!isWatcherUsedByAnyBot) {
-          logger.info(`[TradesConsumer] Removing stale watcher ${channel.exchangeCode}:${watcher.symbol}`);
+          logger.debug(`[TradesConsumer] Removing stale watcher ${channel.exchangeCode}:${watcher.symbol}`);
           channel.removeWatcher(watcher);
         }
       }

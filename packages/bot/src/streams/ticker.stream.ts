@@ -88,7 +88,7 @@ export class TickerStream extends EventEmitter {
       // Clean stale channels
       const isChannelUsedByAnyBot = botsInUse.some((bot) => bot.exchangeCodes.includes(channel.exchangeCode));
       if (!isChannelUsedByAnyBot) {
-        logger.info(`[TickerConsumer] Removing stale channel ${channel.exchangeCode}`);
+        logger.debug(`[TickerConsumer] Removing stale channel ${channel.exchangeCode}`);
         this.removeChannel(channel);
         continue; // no need to check watchers
       }
@@ -100,7 +100,7 @@ export class TickerStream extends EventEmitter {
         );
 
         if (!isWatcherUsedByAnyBot) {
-          logger.info(`[TickerConsumer] Removing stale watcher ${channel.exchangeCode}:${watcher.symbol}`);
+          logger.debug(`[TickerConsumer] Removing stale watcher ${channel.exchangeCode}:${watcher.symbol}`);
           channel.removeWatcher(watcher);
         }
       }
