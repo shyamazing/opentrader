@@ -1,5 +1,5 @@
 import type { IExchange } from "@opentrader/exchanges";
-import { XOrderStatus } from "@opentrader/types";
+import { XOrderSide, XOrderStatus, XOrderType } from "@opentrader/types";
 import type { Order } from "@prisma/client";
 import { logger } from "@opentrader/logger";
 import type { OrderEntity } from "@opentrader/db";
@@ -62,10 +62,44 @@ export class OrderExecutor {
 
       return true;
     } else if (this.order.type === "Market") {
-      const exchangeOrder = await this.exchange.placeMarketOrder({
+      // Some exchanges require price for Market orders.
+      // https://docs.ccxt.com/#/?id=market-buys
+      const marketBuyRequiresPrice: boolean | undefined =
+        this.exchange.ccxt.features?.spot?.createOrder?.marketBuyRequiresPrice;
+
+      /**
+       * Estimates the price for a market order based on the current ticker.
+       * Additionally, a slippage multiplier is applied to the best bid or ask price to
+       * guarantee the order fulfillment on the exchange.
+       */
+      const estimateMarketOrderPrice = async () => {
+        const MAX_PRICE_SLIPPAGE = 0.01; // 1%
+
+        try {
+          const ticker = await this.exchange.getTicker(this.symbol);
+          const estimatedPrice =
+            this.order.side === XOrderSide.Buy
+              ? ticker.ask + ticker.ask * MAX_PRICE_SLIPPAGE
+              : ticker.bid - ticker.bid * MAX_PRICE_SLIPPAGE;
+          logger.debug(
+            `${this.exchange.exchangeCode} requires a price for market orders. The estimated price for ${this.symbol} is ${estimatedPrice}.`,
+          );
+
+          return estimatedPrice;
+        } catch (err) {
+          logger.warn(err, `Failed to estimate market order price. Reason: Cannot retrieve ticker for ${this.symbol}.`);
+
+          return undefined;
+        }
+      };
+
+      const side = this.order.side === XOrderSide.Buy ? "buy" : "sell";
+      const exchangeOrder = await this.exchange.placeOrder({
+        type: XOrderType.Market,
         symbol: this.symbol,
-        side: this.order.side === "Buy" ? "buy" : "sell",
+        side,
         quantity: this.order.quantity,
+        price: marketBuyRequiresPrice && side === "buy" ? await estimateMarketOrderPrice() : undefined,
       });
 
       await xprisma.order.update({
