@@ -13,7 +13,7 @@
     "@opentrader/tsconfig": "workspace:*",
     "@opentrader/types": "workspace:*",
     "@types/async": "^3.2.24",
-    "@types/node": "^20.17.10",
+    "@types/node": "^22.10.2",
     "eslint": "8.57.0",
     "ts-node": "10.9.2",
     "typescript": "5.7.2",
