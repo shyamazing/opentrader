@@ -5,6 +5,7 @@ import { exchangeCodeMapCCXT } from "../client/constants.js";
 export const exchanges: Record<ExchangeCode, ReturnType<typeof createExchange>> = {
   [ExchangeCode.OKX]: createExchange(ExchangeCode.OKX),
   [ExchangeCode.BYBIT]: createExchange(ExchangeCode.BYBIT),
+  [ExchangeCode.BITGET]: createExchange(ExchangeCode.BITGET),
   [ExchangeCode.BINANCE]: createExchange(ExchangeCode.BINANCE),
   [ExchangeCode.KRAKEN]: createExchange(ExchangeCode.KRAKEN),
   [ExchangeCode.COINBASE]: createExchange(ExchangeCode.COINBASE),

@@ -19,6 +19,7 @@ export const ExchangeCode = {
   KRAKEN: "KRAKEN",
   COINBASE: "COINBASE",
   GATEIO: "GATEIO",
+  BITGET: "BITGET",
 } as const;
 
 export type ExchangeCode = (typeof ExchangeCode)[keyof typeof ExchangeCode];

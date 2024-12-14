@@ -7,6 +7,7 @@ import { ExchangeCode } from "@opentrader/types";
 export const exchangeCodeMapCCXT: Record<ExchangeCode, keyof typeof ccxt> = {
   [ExchangeCode.OKX]: "okx",
   [ExchangeCode.BYBIT]: "bybit",
+  [ExchangeCode.BITGET]: "bitget",
   [ExchangeCode.BINANCE]: "binance",
   [ExchangeCode.KRAKEN]: "kraken",
   [ExchangeCode.COINBASE]: "coinbase",
