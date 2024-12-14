@@ -30,6 +30,10 @@ import type {
   IGetOpenOrdersRequest,
   IGetOpenOrdersResponse,
   IGetSymbolInfoRequest,
+  IPlaceOrderRequest,
+  IPlaceOrderResponse,
+  IPlaceMarketOrderRequest,
+  IPlaceMarketOrderResponse,
   IPlaceLimitOrderRequest,
   IPlaceLimitOrderResponse,
   IPlaceStopOrderRequest,
@@ -39,8 +43,6 @@ import type {
   IWatchCandlesResponse,
   IWatchOrdersRequest,
   IWatchOrdersResponse,
-  IPlaceMarketOrderRequest,
-  IPlaceMarketOrderResponse,
   ExchangeCode,
   IWatchTradesRequest,
   IWatchTradesResponse,
@@ -105,6 +107,13 @@ export class CCXTExchange implements IExchange {
     const data = await this.ccxt.fetchOrder(...args);
 
     return normalize.getLimitOrder.response(data);
+  }
+
+  async placeOrder(params: IPlaceOrderRequest): Promise<IPlaceOrderResponse> {
+    const args = normalize.placeOrder.request(params);
+    const data = await this.ccxt.createOrder(...args);
+
+    return normalize.placeOrder.response(data);
   }
 
   async placeLimitOrder(params: IPlaceLimitOrderRequest): Promise<IPlaceLimitOrderResponse> {

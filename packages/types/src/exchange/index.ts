@@ -9,6 +9,7 @@ export * from "./public-data/get-symbols-info.js";
 export * from "./trade/common/enums.js";
 export * from "./trade/cancel-limit-order.js";
 export * from "./trade/get-limit-order.js";
+export * from "./trade/place-order.js";
 export * from "./trade/place-limit-order.js";
 export * from "./trade/place-market-order.js";
 export * from "./trade/place-stop-order.js";

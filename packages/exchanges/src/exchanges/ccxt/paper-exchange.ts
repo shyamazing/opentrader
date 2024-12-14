@@ -38,6 +38,8 @@ import {
   OrderSide,
   OrderStatus,
   OrderType,
+  IPlaceOrderRequest,
+  IPlaceOrderResponse,
 } from "@opentrader/types";
 import { PaperOrder, xprisma } from "@opentrader/db";
 import { CCXTExchange } from "./exchange.js";
@@ -204,6 +206,17 @@ export class PaperExchange extends CCXTExchange {
       lastTradeTimestamp: order.lastTradeTimestamp.getTime(),
       exchangeOrderId: `${order.id}`,
     };
+  }
+
+  async placeOrder(params: IPlaceOrderRequest): Promise<IPlaceOrderResponse> {
+    if (params.type === OrderType.Market) {
+      const price = params.price;
+      if (price === undefined) throw new Error("PaperExchange: Limit orders require a price param");
+
+      return this.placeLimitOrder({ ...params, price });
+    } else {
+      return this.placeMarketOrder(params);
+    }
   }
 
   /**

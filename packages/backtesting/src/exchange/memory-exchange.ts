@@ -9,20 +9,22 @@ import type {
   IGetMarketPriceResponse,
   ICancelLimitOrderRequest,
   ICancelLimitOrderResponse,
-  IGetLimitOrderRequest,
-  IGetLimitOrderResponse,
+  IPlaceOrderRequest,
+  IPlaceOrderResponse,
   IPlaceLimitOrderRequest,
   IPlaceLimitOrderResponse,
+  IPlaceMarketOrderRequest,
+  IPlaceMarketOrderResponse,
+  IPlaceStopOrderRequest,
+  IPlaceStopOrderResponse,
+  IGetLimitOrderRequest,
+  IGetLimitOrderResponse,
   IGetSymbolInfoRequest,
   ISymbolInfo,
   IWatchOrdersRequest,
   IWatchOrdersResponse,
-  IPlaceStopOrderRequest,
-  IPlaceStopOrderResponse,
   IWatchCandlesRequest,
   IWatchCandlesResponse,
-  IPlaceMarketOrderRequest,
-  IPlaceMarketOrderResponse,
   ITrade,
   IOrderbook,
   ITicker,
@@ -62,6 +64,13 @@ export class MemoryExchange implements IExchange {
       createdAt: 0,
       lastTradeTimestamp: 0,
       filledPrice: null,
+    };
+  }
+
+  async placeOrder(_body: IPlaceOrderRequest): Promise<IPlaceOrderResponse> {
+    return {
+      orderId: "",
+      clientOrderId: "",
     };
   }
 

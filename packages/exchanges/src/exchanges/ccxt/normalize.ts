@@ -1,5 +1,6 @@
+import { type OrderType } from "ccxt";
 import { composeSymbolIdFromPair, getExponentAbs } from "@opentrader/tools";
-import { OrderSide } from "@opentrader/types";
+import { OrderSide, XOrderType } from "@opentrader/types";
 import type { Normalize } from "../../types/normalize.interface.js";
 import { normalizeOrderStatus } from "../../utils/normalizeOrderStatus.js";
 
@@ -33,6 +34,24 @@ const getLimitOrder: Normalize["getLimitOrder"] = {
     fee: order.fee?.cost || 0,
     createdAt: order.timestamp,
     lastTradeTimestamp: order.lastTradeTimestamp,
+  }),
+};
+
+const placeOrder: Normalize["placeOrder"] = {
+  request: (params) => {
+    const orderType: OrderType = params.type === XOrderType.Market ? "market" : "limit";
+
+    // Some exchanges require price for Market orders to calculate the total cost of the order in the quote currency.
+    // https://docs.ccxt.com/#/?id=market-buys
+    if (params.price !== undefined) {
+      return [params.symbol, orderType, params.side, params.quantity, params.price];
+    }
+
+    return [params.symbol, orderType, params.side, params.quantity];
+  },
+  response: (order) => ({
+    orderId: order.id,
+    clientOrderId: order.clientOrderId,
   }),
 };
 
@@ -238,6 +257,7 @@ const watchTicker: Normalize["watchTicker"] = {
 export const normalize: Normalize = {
   accountAssets,
   getLimitOrder,
+  placeOrder,
   placeLimitOrder,
   placeMarketOrder,
   placeStopOrder,
