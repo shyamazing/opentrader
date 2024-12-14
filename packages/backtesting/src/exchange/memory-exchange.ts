@@ -101,6 +101,21 @@ export class MemoryExchange implements IExchange {
     };
   }
 
+  async getTicker(symbol: string): Promise<ITicker> {
+    const candlestick = this.marketSimulator.currentCandle;
+    const assetPrice = candlestick.close;
+
+    return {
+      symbol,
+      bid: assetPrice,
+      ask: assetPrice,
+      last: assetPrice,
+      baseVolume: 0,
+      quoteVolume: 0,
+      timestamp: this.marketSimulator.currentCandle.timestamp,
+    };
+  }
+
   async getMarketPrice(params: IGetMarketPriceRequest): Promise<IGetMarketPriceResponse> {
     const candlestick = this.marketSimulator.currentCandle;
     const assetPrice = candlestick.close;

@@ -131,6 +131,26 @@ const getClosedOrders: Normalize["getClosedOrders"] = {
     })),
 };
 
+const getTicker: Normalize["getTicker"] = {
+  request: (symbol) => [symbol],
+  response: (ticker) => ({
+    symbol: ticker.symbol!,
+    timestamp: ticker.timestamp!,
+
+    bid: ticker.bid!,
+    ask: ticker.ask!,
+    last: ticker.last!,
+
+    open: ticker.open,
+    high: ticker.high,
+    low: ticker.low,
+    close: ticker.close,
+
+    baseVolume: ticker.baseVolume!,
+    quoteVolume: ticker.quoteVolume!,
+  }),
+};
+
 const getMarketPrice: Normalize["getMarketPrice"] = {
   request: (params) => [params.symbol],
   response: (ticker) => ({
@@ -264,6 +284,7 @@ export const normalize: Normalize = {
   cancelLimitOrder,
   getOpenOrders,
   getClosedOrders,
+  getTicker,
   getMarketPrice,
   getCandlesticks,
   getSymbol,

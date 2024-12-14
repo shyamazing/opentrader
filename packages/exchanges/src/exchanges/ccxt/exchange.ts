@@ -171,6 +171,13 @@ export class CCXTExchange implements IExchange {
     };
   }
 
+  async getTicker(symbol: string): Promise<ITicker> {
+    const args = normalize.getTicker.request(symbol);
+    const data = await this.ccxt.fetchTicker(...args);
+
+    return normalize.getTicker.response(data);
+  }
+
   async getMarketPrice(params: IGetMarketPriceRequest): Promise<IGetMarketPriceResponse> {
     const args = normalize.getMarketPrice.request(params);
     const data = await this.ccxt.fetchTicker(...args);

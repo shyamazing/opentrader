@@ -82,6 +82,11 @@ export type Normalize = {
     response: (data: Order[]) => IGetClosedOrdersResponse;
   };
 
+  getTicker: {
+    request: (symbol: string) => Parameters<Exchange["fetchTicker"]>;
+    response: (data: Ticker) => ITicker;
+  };
+
   getMarketPrice: {
     request: (params: IGetMarketPriceRequest) => Parameters<Exchange["fetchTicker"]>;
     response: (data: Ticker) => IGetMarketPriceResponse;

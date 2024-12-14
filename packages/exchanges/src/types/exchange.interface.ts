@@ -52,6 +52,7 @@ export interface IExchange {
   placeStopOrder: (body: IPlaceStopOrderRequest) => Promise<IPlaceStopOrderResponse>;
   getOpenOrders: (body: IGetOpenOrdersRequest) => Promise<IGetOpenOrdersResponse>;
   getClosedOrders: (body: IGetClosedOrdersRequest) => Promise<IGetClosedOrdersResponse>;
+  getTicker: (symbol: string) => Promise<ITicker>;
   getMarketPrice: (params: IGetMarketPriceRequest) => Promise<IGetMarketPriceResponse>;
   getCandlesticks: (params: IGetCandlesticksRequest) => Promise<ICandlestick[]>;
   getSymbols: () => Promise<ISymbolInfo[]>;
