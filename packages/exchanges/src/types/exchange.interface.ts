@@ -8,22 +8,24 @@ import {
   ICancelLimitOrderResponse,
   IGetLimitOrderRequest,
   IGetLimitOrderResponse,
-  IPlaceLimitOrderRequest,
-  IPlaceLimitOrderResponse,
   ISymbolInfo,
   IGetSymbolInfoRequest,
   IGetOpenOrdersRequest,
   IGetOpenOrdersResponse,
   IGetClosedOrdersRequest,
   IGetClosedOrdersResponse,
-  IWatchOrdersRequest,
-  IWatchOrdersResponse,
-  IPlaceStopOrderRequest,
-  IPlaceStopOrderResponse,
-  ExchangeCode,
-  IWatchCandlesRequest,
+  IPlaceOrderRequest,
+  IPlaceOrderResponse,
+  IPlaceLimitOrderRequest,
+  IPlaceLimitOrderResponse,
   IPlaceMarketOrderRequest,
   IPlaceMarketOrderResponse,
+  IPlaceStopOrderRequest,
+  IPlaceStopOrderResponse,
+  IWatchOrdersRequest,
+  IWatchOrdersResponse,
+  ExchangeCode,
+  IWatchCandlesRequest,
   IWatchTradesRequest,
   IWatchTradesResponse,
   IOrderbook,
@@ -43,12 +45,14 @@ export interface IExchange {
 
   accountAssets: () => Promise<IAccountAsset[]>;
   getLimitOrder: (body: IGetLimitOrderRequest) => Promise<IGetLimitOrderResponse>;
+  placeOrder: (body: IPlaceOrderRequest) => Promise<IPlaceOrderResponse>;
   placeLimitOrder: (body: IPlaceLimitOrderRequest) => Promise<IPlaceLimitOrderResponse>;
   placeMarketOrder: (boyd: IPlaceMarketOrderRequest) => Promise<IPlaceMarketOrderResponse>;
   cancelLimitOrder: (body: ICancelLimitOrderRequest) => Promise<ICancelLimitOrderResponse>;
   placeStopOrder: (body: IPlaceStopOrderRequest) => Promise<IPlaceStopOrderResponse>;
   getOpenOrders: (body: IGetOpenOrdersRequest) => Promise<IGetOpenOrdersResponse>;
   getClosedOrders: (body: IGetClosedOrdersRequest) => Promise<IGetClosedOrdersResponse>;
+  getTicker: (symbol: string) => Promise<ITicker>;
   getMarketPrice: (params: IGetMarketPriceRequest) => Promise<IGetMarketPriceResponse>;
   getCandlesticks: (params: IGetCandlesticksRequest) => Promise<ICandlestick[]>;
   getSymbols: () => Promise<ISymbolInfo[]>;

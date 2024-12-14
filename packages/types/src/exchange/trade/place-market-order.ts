@@ -2,7 +2,7 @@ import type { OrderSide } from "./common/enums.js";
 
 export interface IPlaceMarketOrderRequest {
   /**
-   * Instrument ID, e.g `ADA-USDT`.
+   * Instrument ID, e.g `BTC/USDT`.
    */
   symbol: string;
   /**

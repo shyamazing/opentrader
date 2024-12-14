@@ -9,20 +9,22 @@ import type {
   IGetMarketPriceResponse,
   ICancelLimitOrderRequest,
   ICancelLimitOrderResponse,
-  IGetLimitOrderRequest,
-  IGetLimitOrderResponse,
+  IPlaceOrderRequest,
+  IPlaceOrderResponse,
   IPlaceLimitOrderRequest,
   IPlaceLimitOrderResponse,
+  IPlaceMarketOrderRequest,
+  IPlaceMarketOrderResponse,
+  IPlaceStopOrderRequest,
+  IPlaceStopOrderResponse,
+  IGetLimitOrderRequest,
+  IGetLimitOrderResponse,
   IGetSymbolInfoRequest,
   ISymbolInfo,
   IWatchOrdersRequest,
   IWatchOrdersResponse,
-  IPlaceStopOrderRequest,
-  IPlaceStopOrderResponse,
   IWatchCandlesRequest,
   IWatchCandlesResponse,
-  IPlaceMarketOrderRequest,
-  IPlaceMarketOrderResponse,
   ITrade,
   IOrderbook,
   ITicker,
@@ -65,6 +67,13 @@ export class MemoryExchange implements IExchange {
     };
   }
 
+  async placeOrder(_body: IPlaceOrderRequest): Promise<IPlaceOrderResponse> {
+    return {
+      orderId: "",
+      clientOrderId: "",
+    };
+  }
+
   async placeLimitOrder(_body: IPlaceLimitOrderRequest): Promise<IPlaceLimitOrderResponse> {
     return {
       orderId: "",
@@ -89,6 +98,21 @@ export class MemoryExchange implements IExchange {
   async cancelLimitOrder(_body: ICancelLimitOrderRequest): Promise<ICancelLimitOrderResponse> {
     return {
       orderId: "",
+    };
+  }
+
+  async getTicker(symbol: string): Promise<ITicker> {
+    const candlestick = this.marketSimulator.currentCandle;
+    const assetPrice = candlestick.close;
+
+    return {
+      symbol,
+      bid: assetPrice,
+      ask: assetPrice,
+      last: assetPrice,
+      baseVolume: 0,
+      quoteVolume: 0,
+      timestamp: this.marketSimulator.currentCandle.timestamp,
     };
   }
 

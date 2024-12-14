@@ -30,6 +30,10 @@ import type {
   IGetOpenOrdersRequest,
   IGetOpenOrdersResponse,
   IGetSymbolInfoRequest,
+  IPlaceOrderRequest,
+  IPlaceOrderResponse,
+  IPlaceMarketOrderRequest,
+  IPlaceMarketOrderResponse,
   IPlaceLimitOrderRequest,
   IPlaceLimitOrderResponse,
   IPlaceStopOrderRequest,
@@ -39,8 +43,6 @@ import type {
   IWatchCandlesResponse,
   IWatchOrdersRequest,
   IWatchOrdersResponse,
-  IPlaceMarketOrderRequest,
-  IPlaceMarketOrderResponse,
   ExchangeCode,
   IWatchTradesRequest,
   IWatchTradesResponse,
@@ -107,6 +109,13 @@ export class CCXTExchange implements IExchange {
     return normalize.getLimitOrder.response(data);
   }
 
+  async placeOrder(params: IPlaceOrderRequest): Promise<IPlaceOrderResponse> {
+    const args = normalize.placeOrder.request(params);
+    const data = await this.ccxt.createOrder(...args);
+
+    return normalize.placeOrder.response(data);
+  }
+
   async placeLimitOrder(params: IPlaceLimitOrderRequest): Promise<IPlaceLimitOrderResponse> {
     if ("clientOrderId" in params) {
       throw new Error("Fetch limit order by `clientOrderId` is not supported yet");
@@ -160,6 +169,13 @@ export class CCXTExchange implements IExchange {
     return {
       orderId: params.orderId,
     };
+  }
+
+  async getTicker(symbol: string): Promise<ITicker> {
+    const args = normalize.getTicker.request(symbol);
+    const data = await this.ccxt.fetchTicker(...args);
+
+    return normalize.getTicker.response(data);
   }
 
   async getMarketPrice(params: IGetMarketPriceRequest): Promise<IGetMarketPriceResponse> {

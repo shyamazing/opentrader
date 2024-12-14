@@ -13,8 +13,12 @@ import type {
   IGetMarketPriceRequest,
   IGetMarketPriceResponse,
   IGetSymbolInfoRequest,
+  IPlaceOrderRequest,
+  IPlaceOrderResponse,
   IPlaceLimitOrderRequest,
   IPlaceLimitOrderResponse,
+  IPlaceMarketOrderRequest,
+  IPlaceMarketOrderResponse,
   ISymbolInfo,
   IWatchOrdersRequest,
   IWatchOrdersResponse,
@@ -22,8 +26,6 @@ import type {
   IPlaceStopOrderResponse,
   IWatchCandlesRequest,
   IWatchCandlesResponse,
-  IPlaceMarketOrderRequest,
-  IPlaceMarketOrderResponse,
   ExchangeCode,
   IWatchTradesRequest,
   IWatchTradesResponse,
@@ -41,6 +43,11 @@ export type Normalize = {
   getLimitOrder: {
     request: (params: IGetLimitOrderRequest) => Parameters<Exchange["fetchOrder"]>;
     response: (data: Order) => IGetLimitOrderResponse;
+  };
+
+  placeOrder: {
+    request: (params: IPlaceOrderRequest) => Parameters<Exchange["createOrder"]>;
+    response: (data: Order) => IPlaceOrderResponse;
   };
 
   placeLimitOrder: {
@@ -73,6 +80,11 @@ export type Normalize = {
   getClosedOrders: {
     request: (params: IGetClosedOrdersRequest) => Parameters<Exchange["fetchClosedOrders"]>;
     response: (data: Order[]) => IGetClosedOrdersResponse;
+  };
+
+  getTicker: {
+    request: (symbol: string) => Parameters<Exchange["fetchTicker"]>;
+    response: (data: Ticker) => ITicker;
   };
 
   getMarketPrice: {
