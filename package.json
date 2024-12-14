@@ -23,7 +23,7 @@
     "resolve-tspaths": "^0.8.23",
     "ts-node": "10.9.2",
     "tsconfig-moon": "^1.3.0",
-    "typescript": "5.5.4"
+    "typescript": "5.7.2"
   },
   "scripts": {
     "dev": "moon run :dev",
