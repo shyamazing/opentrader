@@ -20,7 +20,7 @@ import { logPath } from "./utils/app-path.js";
 process.env.LOG_FILE = logPath;
 
 import { Command } from "commander";
-import packageJSON from "../package.json";
+import packageJSON from "../package.json" assert { type: "json" };
 import { setPasswordCommand } from "./commands/set-password.js";
 import { addExchangeAccountCommand } from "./commands/exchange/add.js";
 import { updateExchangeAccountCommand } from "./commands/exchange/update.js";
