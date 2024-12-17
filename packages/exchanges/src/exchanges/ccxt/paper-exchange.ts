@@ -209,7 +209,7 @@ export class PaperExchange extends CCXTExchange {
   }
 
   async placeOrder(params: IPlaceOrderRequest): Promise<IPlaceOrderResponse> {
-    if (params.type === OrderType.Market) {
+    if (params.type === OrderType.Limit) {
       const price = params.price;
       if (price === undefined) throw new Error("PaperExchange: Limit orders require a price param");
 
