@@ -58,7 +58,7 @@ export class Platform {
     if (bots.length === 0) return;
     logger.info(`[Processor] Stopping ${bots.length} bots gracefully…`);
 
-    for (const bot of bots) {
+    for (let bot of bots) {
       // Check if the strategy function exists
       // If not, just mark the bot as disabled
       try {
@@ -78,13 +78,14 @@ export class Platform {
         continue;
       }
 
-      const botProcessor = new BotProcessing(bot);
-      await botProcessor.processStopCommand();
-
-      await xprisma.bot.custom.update({
+      bot = await xprisma.bot.custom.update({
         where: { id: bot.id },
         data: { enabled: false, processing: false },
+        include: { exchangeAccount: true },
       });
+
+      const botProcessor = new BotProcessing(bot);
+      await botProcessor.processStopCommand();
 
       logger.info(`[Processor] Bot stopped [id=${bot.id} name=${bot.name}]`);
     }
