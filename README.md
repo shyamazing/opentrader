@@ -7,35 +7,44 @@
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/bludnic/opentrader/dev.yml)](https://github.com/bludnic/opentrader/actions)
 [![NPM Version](https://img.shields.io/npm/v/opentrader?color=blue)](https://www.npmjs.com/package/opentrader)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/bludnic/opentrader)](https://github.com/bludnic/opentrader/graphs/contributors)
+[![Static Badge](https://img.shields.io/badge/Twitter-black?logo=X&color=white&logoColor=black)](https://discord.gg/RS7y3ffvvG)
 [![Static Badge](https://img.shields.io/badge/Discord-white?logo=Discord)](https://discord.gg/RS7y3ffvvG)
 [![Static Badge](https://img.shields.io/badge/Reddit-white?logo=Reddit)](https://www.reddit.com/r/OpenTrader)
 [![Static Badge](https://img.shields.io/badge/Telegram-white?logo=Telegram)](https://t.me/+cJLNxLSjcW83Njgy)
 
-[OpenTrader](https://github.com/bludnic/opentrader) is an advanced cryptocurrency trading bot offering high-frequency, cross-exchange arbitrage and event-based strategies, including technical analysis with indicators. Features a user-friendly management UI, robust backtesting capabilities, and support for 100+ exchanges via CCXT.
+[OpenTrader](https://github.com/bludnic/opentrader) is a self-hosted cryptocurrency trading bot, featuring built-in and highly customizable strategies, integration with technical indicators, high-frequency trading, and cross-exchange trading with support for 100+ exchanges via CCXT.
 
 **Features:**
 
 - **✨ Robust UI**: A user-friendly interface for managing the bots.
 - **🌐 Multiple Exchanges:** Trade across various cryptocurrency exchanges.
 - **📝 Paper Trading**: Test your strategies without risking real money.
-- **⚙️ Easy Installation:** Install effortlessly via NPM for a streamlined setup process.
+- **📊 Backtesting:** Backtest your strategies using historical data.
+- **⚙️ Easy Installation:** Install effortlessly via NPM.
 
 **Strategies:**
 
-- [x] [Grid](packages/bot-templates/src/templates/grid-bot.ts): Make profits from market fluctuations by creating a grid of buy and sell orders.
-- [x] [DCA](packages/bot-templates/src/templates/dca.ts): Entry with multiple orders to average the entry price and sell on price swings.
-- [x] [RSI](packages/bot-templates/src/templates/rsi.ts): Places orders based on the RSI indicator value.
-- [ ] `ARB`: Arbitrage strategy that takes advantage of price differences through cross-exchange trading.
-- [x] [CUSTOM](https://github.com/Open-Trader/custom-strategy): Build your own strategy in just a few lines of code
+- ☑️ [GRID](packages/bot-templates/src/templates/grid-bot.ts): Make profits from market fluctuations by creating a grid of buy and sell orders.
+- ☑️ [DCA](packages/bot-templates/src/templates/dca.ts): Entry with multiple orders to average the entry price and sell on price swings.
+- ☑️ [RSI](packages/bot-templates/src/templates/rsi.ts): Places orders based on the RSI indicator value.
+- 🛠️ [CUSTOM](https://github.com/Open-Trader/custom-strategy): Build your own strategy in just a few lines of code.
 
-# 🤖 State of the Project
+# 💓 Status of the project
 
-This project is a personal passion, developed in my free time, and currently not monetized. If you find it useful, please give it a ⭐️. Your support means a lot and motivates me to keep improving the bot. If you'd like to make a donation, see the options below. 💖
+This project is a personal passion, developed in my free time. If you find it useful, please give it a ⭐️. Your support means a lot and motivates me to keep improving the bot. If you'd like to make a [donation](#Donate), see the options below. 💖
 
-> [!NOTE]
-> If you choose to build the project from source, please note that you'll only be able to interact with the bot via the CLI, and you can run only one bot instance. Running multiple bots requires the UI, which currently resides in a private repo until I finalize the licensing and funding options.
+# 👋🏻 Join our Community
 
-Currently, the NPM version includes the full bot functionality, including the UI, and I'm offering it for free to early adopters. 🎉
+Connect with developers, request features, and receive support. Join our community on [Discord](https://discord.gg/RS7y3ffvvG).
+
+[![Static Badge](https://img.shields.io/badge/Discord-white?logo=Discord&style=for-the-badge&color=7289da&logoColor=white)](https://discord.gg/RS7y3ffvvG)
+[![Static Badge](https://img.shields.io/badge/Telegram-white?logo=Telegram&style=for-the-badge&color=white)](https://t.me/+cJLNxLSjcW83Njgy)
+[![Static Badge](https://img.shields.io/badge/Reddit-white?logo=Reddit&style=for-the-badge&color=white)](https://www.reddit.com/r/OpenTrader)
+
+For announcements and updates, follow us on [Twitter](https://x.com/OpenTraderLabs) and [Telegram](https://t.me/opentrader_pro).
+
+[![Static Badge](https://img.shields.io/badge/Twitter-white?logo=X&style=for-the-badge&color=black)](https://x.com/OpenTraderLabs)
+[![Static Badge](https://img.shields.io/badge/Telegram-white?logo=Telegram&style=for-the-badge&color=24A1DE&logoColor=white)](https://t.me/opentrader_pro)
 
 # Quick start
 
@@ -81,7 +90,7 @@ You can access the OpenTrader UI on: http://localhost:8000
 
 Copy the `exchanges.sample.json5` file to `exchanges.json5` and add your API keys.
 
-> Available exchanges: OKX, BYBIT, BINANCE, KRAKEN, COINBASE, GATEIO
+> Available exchanges: OKX, BYBIT, BINANCE, KRAKEN, COINBASE, GATEIO, BITGET
 
 ### Choose a strategy
 
