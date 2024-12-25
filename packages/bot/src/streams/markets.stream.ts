@@ -74,10 +74,10 @@ export class MarketsStream extends EventEmitter {
     this.tickerStream.on("ticker", handleTicker);
 
     return () => {
-      this.candlesStream.off("market", handleCandle);
-      this.tradesStream.off("market", handleTrade);
-      this.orderbookStream.off("market", handleOrderbook);
-      this.tickerStream.off("market", handleTicker);
+      this.candlesStream.off("candle", handleCandle);
+      this.tradesStream.off("trade", handleTrade);
+      this.orderbookStream.off("orderbook", handleOrderbook);
+      this.tickerStream.off("ticker", handleTicker);
     };
   }
 
