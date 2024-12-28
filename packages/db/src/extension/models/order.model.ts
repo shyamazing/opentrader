@@ -33,12 +33,9 @@ export const orderModel = (prisma: PrismaClient) => ({
    */
   async updateStatus(status: Extract<XOrderStatus, "Canceled" | "Revoked" | "Deleted">, orderId: number) {
     return prisma.order.update({
-      where: {
-        id: orderId,
-      },
-      data: {
-        status,
-      },
+      where: { id: orderId },
+      data: { status },
+      include: { smartTrade: true },
     });
   },
   async updateStatusToFilled(data: {
@@ -71,6 +68,7 @@ export const orderModel = (prisma: PrismaClient) => ({
         filledAt,
         fee,
       },
+      include: { smartTrade: true },
     });
   },
   async updateSyncedAt(orderId: number) {

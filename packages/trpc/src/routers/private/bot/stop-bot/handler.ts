@@ -18,6 +18,8 @@ export async function stopGridBot({ input }: Options) {
   botService.assertIsNotAlreadyStopped();
   botService.assertIsNotProcessing();
 
+  eventBus.beforeBotStopped(botService.bot);
+
   const botProcessor = new BotProcessing(botService.bot);
   await botProcessor.processStopCommand();
 

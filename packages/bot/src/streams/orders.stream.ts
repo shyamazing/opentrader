@@ -1,18 +1,28 @@
-import { findStrategy } from "@opentrader/bot-templates/server";
-import type { ExchangeCode, IWatchOrder, MarketId } from "@opentrader/types";
-import { BotProcessing, getWatchers, shouldRunStrategy, SmartTradeExecutor } from "@opentrader/processing";
+import { EventEmitter } from "node:events";
+import type { ExchangeCode, IWatchOrder } from "@opentrader/types";
 import type { OrderWithSmartTrade, ExchangeAccountWithCredentials } from "@opentrader/db";
 import { xprisma } from "@opentrader/db";
 import { logger } from "@opentrader/logger";
 import { decomposeSymbol } from "@opentrader/tools";
-import { OrdersChannel } from "../channels/index.js";
-import { processingQueue } from "../queue/index.js";
+import { OrdersChannel, OrderEventType } from "../channels/index.js";
 
-export class OrdersStream {
+export type OrderEvent = {
+  type: OrderEventType;
+  exchangeOrder: IWatchOrder;
+  order: OrderWithSmartTrade;
+  exchangeCode: ExchangeCode;
+};
+
+/**
+ * Emits:
+ * - order: OrderEvent
+ */
+export class OrdersStream extends EventEmitter {
   private channels: OrdersChannel[] = [];
   private initialExchangeAccounts: ExchangeAccountWithCredentials[];
 
   constructor(exchangeAccounts: ExchangeAccountWithCredentials[]) {
+    super();
     this.initialExchangeAccounts = exchangeAccounts;
   }
 
@@ -38,7 +48,9 @@ export class OrdersStream {
 
     await ordersWatcher.enable();
 
-    logger.debug(`${exchangeAccount.exchangeCode} exchange account with ID ${exchangeAccount.id} subscribed to OrdersWatcher`);
+    logger.debug(
+      `${exchangeAccount.exchangeCode} exchange account with ID ${exchangeAccount.id} subscribed to OrdersWatcher`,
+    );
   }
 
   async removeExchangeAccount(exchangeAccount: ExchangeAccountWithCredentials) {
@@ -74,49 +86,47 @@ export class OrdersStream {
     logger.info(
       `🔋 [${exchangeCode}] onOrderFilled: Order #${order.id}: ${order.exchangeOrderId} was filled with price ${exchangeOrder.filledPrice} at ${exchangeOrder.lastTradeTimestamp} timestamp`,
     );
-    await xprisma.order.updateStatusToFilled({
+    const updatedOrder = await xprisma.order.updateStatusToFilled({
       orderId: order.id,
       filledPrice: exchangeOrder.filledPrice,
       filledAt: new Date(exchangeOrder.lastTradeTimestamp || Date.now()),
       fee: exchangeOrder.fee,
     });
 
-    const botProcessor = await BotProcessing.fromSmartTradeId(order.smartTrade.id);
-
-    if (botProcessor.isBotStopped()) {
-      logger.error("❗ Cannot run bot process when the bot is disabled");
-      return;
-    }
-
-    const bot = botProcessor.getBot();
-    const marketId = `${exchangeCode}:${order.smartTrade.symbol}` as MarketId;
-    const { strategyFn } = findStrategy(bot.template);
-    const { watchOrderbook, watchCandles, watchTrades, watchTicker } = getWatchers(strategyFn, bot);
-    const subscribedMarkets = [
-      ...new Set([...watchOrderbook, ...watchCandles, ...watchTrades, ...watchTicker]),
-    ] as MarketId[];
-
-    if (shouldRunStrategy(strategyFn, bot, "onOrderFilled")) {
-      processingQueue.push({
-        type: "onOrderFilled",
-        marketId,
-        bot,
-        orderId: order.id,
-        subscribedMarkets,
-      });
-    }
+    this.emit("order", {
+      type: "onFilled",
+      exchangeOrder,
+      order: updatedOrder,
+      exchangeCode,
+    } satisfies OrderEvent);
   }
 
-  private async onOrderCanceled(exchangeOrder: IWatchOrder, order: OrderWithSmartTrade) {
+  private async onOrderCanceled(exchangeOrder: IWatchOrder, order: OrderWithSmartTrade, exchangeCode: ExchangeCode) {
     // Edge case: the user may cancel the order manually on the exchange
-    await xprisma.order.updateStatus("Canceled", order.id);
+    const updatedOrder = await xprisma.order.updateStatus("Canceled", order.id);
     logger.info(`❌  onOrderCanceled: Order #${order.id}: ${order.exchangeOrderId} was canceled`);
+
+    this.emit("order", {
+      type: "onCanceled",
+      exchangeOrder,
+      order: updatedOrder,
+      exchangeCode,
+    } satisfies OrderEvent);
   }
 
-  private async onOrderPlaced(exchangeOrder: IWatchOrder, order: OrderWithSmartTrade) {
+  private async onOrderPlaced(exchangeOrder: IWatchOrder, order: OrderWithSmartTrade, exchangeCode: ExchangeCode) {
     // Edge case: the user could change the price of the order on the Exchange
     const { quoteCurrency } = decomposeSymbol(order.symbol);
-    logger.info(`⬆️  onOrderPlaced: Placed ${order.symbol} order at ${exchangeOrder.price} ${quoteCurrency} (id: ${order.id}, eid: ${order.exchangeOrderId})`);
+    logger.info(
+      `⬆️  onOrderPlaced: Placed ${order.symbol} order at ${exchangeOrder.price} ${quoteCurrency} (id: ${order.id}, eid: ${order.exchangeOrderId})`,
+    );
+
+    this.emit("order", {
+      type: "onPlaced",
+      exchangeOrder,
+      order,
+      exchangeCode,
+    } satisfies OrderEvent);
 
     // Order was possibly replaced.
     // This means that the user changed the order price on the Exchange.

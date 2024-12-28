@@ -18,6 +18,8 @@ export async function startGridBot({ input }: Options) {
   botService.assertIsNotAlreadyRunning();
   botService.assertIsNotProcessing();
 
+  eventBus.beforeBotStarted(botService.bot);
+
   const botProcessor = new BotProcessing(botService.bot);
   await botProcessor.processStartCommand();
 
