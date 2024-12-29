@@ -15,27 +15,31 @@
  *
  * Repository URL: https://github.com/bludnic/opentrader
  */
-import { Server } from "node:http";
 import { Platform } from "@opentrader/bot";
 import { logger } from "@opentrader/logger";
-import { createServer, CreateServerOptions } from "./server.js";
+import { Server, CreateServerOptions } from "./server.js";
 import { bootstrapPlatform } from "./platform.js";
+import { FastifyInstance } from "fastify";
 
 type DaemonParams = {
   server: CreateServerOptions;
 };
 
 export class Daemon {
+  private fastify: Server;
+
   constructor(
     private platform: Platform,
-    private server: Server,
-  ) {}
+    private server: Promise<void>, //TODO: fix typing
+  ) {
+    this.fastify = new Server();
+  }
 
-  static async create(params: DaemonParams) {
+  async create(params: DaemonParams) {
     const platform = await bootstrapPlatform();
     logger.info("✅ Platform bootstrapped successfully");
 
-    const server = createServer(params.server).listen();
+    const server = this.fastify.startServer(params.server);
     logger.info(`RPC Server listening on port ${params.server.port}`);
     logger.info(`OpenTrader UI: http://localhost:${params.server.port}`);
 
@@ -51,8 +55,8 @@ export class Daemon {
   async shutdown() {
     logger.info("Shutting down Daemon...");
 
-    this.server.close();
-    logger.info("Express Server shutted down gracefully.");
+    this.fastify.closeServer();
+    logger.info("Fastify Server shutted down gracefully.");
 
     await this.platform.shutdown();
     logger.info("Processor shutted down gracefully.");
