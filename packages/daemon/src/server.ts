@@ -1,9 +1,10 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import serveHandler from "serve-handler";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import express, { type Express } from "express";
-import cors from "cors";
+import Fastify from 'fastify';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
+
+
 
 import { appRouter } from "@opentrader/trpc";
 import { createContext } from "./trpc.js";
@@ -22,35 +23,44 @@ export type CreateServerOptions = {
   port: number;
 };
 
-export const createServer = ({ frontendDistPath, port }: CreateServerOptions) => {
-  const app: Express = express();
-  let server: ReturnType<typeof app.listen> | null = null;
+const fastify = Fastify();
 
-  return {
-    app,
-    server,
-    listen: (cb?: () => void) => {
-      app.use(cors());
+export const createServer = (params: CreateServerOptions) => {
 
-      // Configure tRPC
-      app.use(
-        "/api/trpc",
-        createExpressMiddleware({
-          router: appRouter,
-          createContext,
-        }),
-      );
+  const staticDir = path.join(__dirname, params.frontendDistPath);
 
-      // Serve Frontend app
-      const staticDir = path.resolve(__dirname, frontendDistPath);
-      app.get("*", (req, res) => serveHandler(req, res, { public: staticDir }));
+  fastify.register(require('@fastify/cors'), {
+    origin: true,
+  });
 
-      server = app.listen(port, cb);
+  fastify.register(require('@fastify/static'), {
+    root: staticDir,
+    prefix: '/', // optional: default '/'
+  });
 
-      return server;
-    },
-    close: () => {
-      server?.close();
-    },
-  };
+  fastify.route({
+    method: 'GET',
+    url: '/*',
+    handler: async (request, reply) => {
+      await serveHandler(request.raw, reply.raw, { public: staticDir });
+      reply.sent = true;
+    }
+  });
+
+  fastify.register(fastifyTRPCPlugin, {
+    prefix: '/api/trpc',
+    trpcOptions: { router: appRouter, createContext: createContext as () => ReturnType<typeof createContext> },
+  });
+
+  return fastify.listen({ port: params.port }, (err, address) => {
+    if (err) {
+      fastify.log.error(err);
+      process.exit(1);
+    }
+    fastify.log.info(`Server listening at ${address}`);
+  });
+};
+
+export const closeServer = () => {
+  fastify.close();
 };
