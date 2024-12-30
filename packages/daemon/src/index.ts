@@ -17,33 +17,45 @@
  */
 import { Platform } from "@opentrader/bot";
 import { logger } from "@opentrader/logger";
-import { Server, CreateServerOptions } from "./server.js";
+import { createServer, CreateServerOptions } from "./server.js";
 import { bootstrapPlatform } from "./platform.js";
-import { FastifyInstance } from "fastify";
 
 type DaemonParams = {
   server: CreateServerOptions;
 };
 
 export class Daemon {
-  private fastify: Server;
-
   constructor(
     private platform: Platform,
-    private server: Promise<void>, //TODO: fix typing
-  ) {
-    this.fastify = new Server();
-  }
+    private server: ReturnType<typeof createServer>,
+  ) {}
 
-  async create(params: DaemonParams) {
-    const platform = await bootstrapPlatform();
-    logger.info("✅ Platform bootstrapped successfully");
+  static async create(params: DaemonParams): Promise<Daemon> {
+    try {
+      logger.info("Bootstrapping platform...");
+      const platform = await bootstrapPlatform();
+      logger.info("✅ Platform bootstrapped successfully");
 
-    const server = this.fastify.startServer(params.server);
-    logger.info(`RPC Server listening on port ${params.server.port}`);
-    logger.info(`OpenTrader UI: http://localhost:${params.server.port}`);
+      logger.info("Creating server...");
+      const server = createServer(params.server);
+      logger.info("✅ Server created successfully");
 
-    return new Daemon(platform, server);
+      logger.info("Starting server...");
+      try {
+        server.listen();
+      } catch (error) {
+        logger.error("Error during server start:", error);
+        throw error;
+      }
+      logger.info("✅ Server started successfully");
+      logger.info(`RPC Server listening on port ${params.server.port}`);
+      logger.info(`OpenTrader UI: http://localhost:${params.server.port}`);
+
+      return new Daemon(platform, server);
+    } catch (error) {
+      logger.error("Error during Daemon creation:", error);
+      throw error;
+    }
   }
 
   async restart() {
@@ -55,7 +67,7 @@ export class Daemon {
   async shutdown() {
     logger.info("Shutting down Daemon...");
 
-    this.fastify.closeServer();
+    await this.server.close();
     logger.info("Fastify Server shutted down gracefully.");
 
     await this.platform.shutdown();

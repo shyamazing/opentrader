@@ -5,6 +5,8 @@ import Fastify, { FastifyInstance } from 'fastify';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { appRouter } from "@opentrader/trpc";
 import { createContext } from "./trpc.js";
+import fastifyCors from '@fastify/cors';
+import fastifyStatic from '@fastify/static';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,52 +22,53 @@ export type CreateServerOptions = {
   port: number;
 };
 
-export class Server {
-  private fastify: FastifyInstance;
+export const createServer = (params: CreateServerOptions) => {
+  const fastify = Fastify();
+  const staticDir = path.join(__dirname, params.frontendDistPath);
 
-  constructor() {
-    this.fastify = Fastify();
-  }
-
-  createServer(params: CreateServerOptions): void {
-    const staticDir = path.join(__dirname, params.frontendDistPath);
-
-    this.fastify.register(require('@fastify/cors'), {
+  try {
+    fastify.register(fastifyCors, {
       origin: true,
     });
 
-    this.fastify.register(require('@fastify/static'), {
+    fastify.register(fastifyStatic, {
       root: staticDir,
       prefix: '/', // optional: default '/'
     });
-
-    this.fastify.route({
-      method: 'GET',
-      url: '/*',
-      handler: async (request, reply) => {
-        await serveHandler(request.raw, reply.raw, { public: staticDir });
-        reply.sent = true;
-      }
-    });
-
-    this.fastify.register(fastifyTRPCPlugin, {
-      prefix: '/api/trpc',
-      trpcOptions: { router: appRouter, createContext: createContext as () => ReturnType<typeof createContext> },
-    });
+  } catch (err) {
+    fastify.log.error('Error registering plugins:', err);
+    process.exit(1);
   }
 
-  async startServer(params: CreateServerOptions): Promise<void> {
-    this.createServer(params);
-    try {
-      await this.fastify.listen({ port: params.port });
-      this.fastify.log.info(`Server listening at http://localhost:${params.port}`);
-    } catch (err) {
-      this.fastify.log.error(err);
-      process.exit(1);
+  fastify.route({
+    method: 'GET',
+    url: '/*',
+    handler: async (request, reply) => {
+      await serveHandler(request.raw, reply.raw, { public: staticDir });
+      reply.sent = true;
     }
-  }
+  });
 
-  async closeServer(): Promise<void> {
-    await this.fastify.close();
-  }
-}
+  fastify.register(fastifyTRPCPlugin, {
+    prefix: '/api/trpc',
+    trpcOptions: { router: appRouter, createContext: createContext as () => ReturnType<typeof createContext> },
+  });
+
+  return {
+    app: fastify,
+    server: fastify.server,
+    listen: async () => {
+      try {
+        fastify.log.info(`Attempting to listen on port ${params.port}`);
+        await fastify.listen({ port: params.port, host: '0.0.0.0' });
+        fastify.log.info(`Server listening at http://localhost:${params.port}`);
+      } catch (err) {
+        fastify.log.error(err);
+        process.exit(1);
+      }
+    },
+    close: async () => {
+      await fastify.close();
+    }
+  };
+};
