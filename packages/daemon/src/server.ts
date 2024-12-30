@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import serveHandler from "serve-handler";
-import Fastify, { FastifyInstance } from 'fastify';
+import Fastify from 'fastify';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { appRouter } from "@opentrader/trpc";
 import { createContext } from "./trpc.js";
