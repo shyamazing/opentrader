@@ -23,7 +23,9 @@ export type CreateServerOptions = {
 };
 
 export const createServer = (params: CreateServerOptions) => {
-  const fastify = Fastify();
+  const fastify = Fastify({
+    logger: true
+  });
   const staticDir = path.join(__dirname, params.frontendDistPath);
 
   try {
@@ -59,12 +61,11 @@ export const createServer = (params: CreateServerOptions) => {
     server: fastify.server,
     listen: async () => {
       try {
-        fastify.log.info(`Attempting to listen on port ${params.port}`);
-        await fastify.listen({ port: params.port, host: '0.0.0.0' });
+        await fastify.listen({ port: params.port, host: '0.0.0.0' }); // Listen on all interfaces, remove host to listen only on localhost
         fastify.log.info(`Server listening at http://localhost:${params.port}`);
       } catch (err) {
-        fastify.log.error(err);
-        process.exit(1);
+        fastify.log.error(err)
+        process.exit(1)
       }
     },
     close: async () => {
