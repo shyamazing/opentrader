@@ -13,7 +13,6 @@
     "@opentrader/tsconfig": "workspace:*",
     "@opentrader/types": "workspace:*",
     "@types/cors": "^2.8.17",
-    "@types/fastify": "^4.0.0",
     "@types/node": "^22.10.2",
     "@types/serve-handler": "^6.1.4",
     "eslint": "8.57.0",
