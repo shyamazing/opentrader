@@ -28,29 +28,15 @@ export const createServer = (params: CreateServerOptions) => {
   });
   const staticDir = path.join(__dirname, params.frontendDistPath);
 
-  try {
-    fastify.register(fastifyCors, {
-      origin: true,
-    });
-
-    fastify.register(fastifyStatic, {
-      root: staticDir,
-      prefix: '/', // optional: default '/'
-    });
-  } catch (err) {
-    fastify.log.error('Error registering plugins:', err);
-    process.exit(1);
-  }
-
-  fastify.route({
-    method: 'GET',
-    url: '/*',
-    handler: async (request, reply) => {
-      await serveHandler(request.raw, reply.raw, { public: staticDir });
-      reply.sent = true;
-    }
+  fastify.register(fastifyCors, {
+    origin: true,
   });
 
+  fastify.register(fastifyStatic, {
+    root: staticDir,
+    prefix: '/', // optional: default '/'
+  });
+  
   fastify.register(fastifyTRPCPlugin, {
     prefix: '/api/trpc',
     trpcOptions: { router: appRouter, createContext: createContext as () => ReturnType<typeof createContext> },
@@ -62,7 +48,7 @@ export const createServer = (params: CreateServerOptions) => {
     listen: async () => {
       try {
         await fastify.listen({ port: params.port, host: '0.0.0.0' }); // Listen on all interfaces, remove host to listen only on localhost
-        fastify.log.info(`Server listening at http://localhost:${params.port}`);
+        fastify.log.debug(`Server listening at http://localhost:${params.port}`);
       } catch (err) {
         fastify.log.error(err)
         process.exit(1)
