@@ -46,7 +46,7 @@ export type CreateServerOptions = {
  */
 export const createServer = (params: CreateServerOptions) => {
   const fastify = Fastify({
-    logger: false,
+    logger: false, // Set to true to enable logging
     maxParamLength: 1000,
   });
   const staticDir = path.join(__dirname, params.frontendDistPath);
