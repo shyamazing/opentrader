@@ -47,18 +47,14 @@ export class Daemon {
       const platform = await bootstrapPlatform();
       logger.info("✅ Platform bootstrapped successfully");
 
-      logger.info("Creating server...");
       const server = createServer(params.server);
-      logger.info("✅ Server created successfully");
 
-      logger.info("Starting server...");
       try {
         server.listen();
       } catch (error) {
         logger.error("Error during server start:", error);
         throw error;
       }
-      logger.info("✅ Server started successfully");
       logger.info(`RPC Server listening on port ${params.server.port}`);
       logger.info(`OpenTrader UI: http://localhost:${params.server.port}`);
 
