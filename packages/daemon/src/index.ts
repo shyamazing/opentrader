@@ -25,11 +25,22 @@ type DaemonParams = {
 };
 
 export class Daemon {
+  /**
+   * Constructs an instance of the class Daemon, called from the create class method.
+   * 
+   * @param platform - The platform instance used by the class.
+   * @param server - The server instance created by the `createServer` function.
+   */
   constructor(
     private platform: Platform,
     private server: ReturnType<typeof createServer>,
   ) {}
 
+  /**
+   * Creates a new Daemon instance.
+   * @param params - The parameters required to create the Daemon.
+   * @returns A promise that resolves to a Daemon instance.
+   */
   static async create(params: DaemonParams): Promise<Daemon> {
     try {
       logger.info("Bootstrapping platform...");
@@ -58,12 +69,18 @@ export class Daemon {
     }
   }
 
+  /**
+   * Restarts the Daemon by shutting down the platform and bootstrapping it again.
+   */
   async restart() {
     await this.platform.shutdown();
 
     this.platform = await bootstrapPlatform();
   }
 
+  /**
+   * Shuts down the Daemon by closing the server and shutting down the platform.
+   */
   async shutdown() {
     logger.info("Shutting down Daemon...");
 
