@@ -1,6 +1,5 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import superjson from "superjson";
 import Fastify from "fastify";
 import fastifyCors from "@fastify/cors";
 import fastifyStatic from "@fastify/static";
@@ -42,7 +41,7 @@ export const createServer = (params: CreateServerOptions) => {
     prefix: "/api/trpc",
     trpcOptions: {
       router: appRouter,
-      createContext: createContext as () => ReturnType<typeof createContext>,
+      createContext,
     },
   });
 

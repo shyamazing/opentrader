@@ -1,4 +1,4 @@
-import { type CreateExpressContextOptions } from "@trpc/server/adapters/express";
+import { type CreateFastifyContextOptions } from "@trpc/server/adapters/fastify";
 
 import { trpc, appRouter, type Context } from "@opentrader/trpc";
 
@@ -12,7 +12,7 @@ const ctx = {
 };
 
 // created for each request
-export const createContext = ({ req }: CreateExpressContextOptions): Context => {
+export const createContext = ({ req }: CreateFastifyContextOptions): Context => {
   const password = req.headers.authorization;
 
   if (password === process.env.ADMIN_PASSWORD) {
