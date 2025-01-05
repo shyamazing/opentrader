@@ -15,7 +15,6 @@
  *
  * Repository URL: https://github.com/bludnic/opentrader
  */
-import { Server } from "node:http";
 import { Platform } from "@opentrader/bot";
 import { logger } from "@opentrader/logger";
 import { createServer, CreateServerOptions } from "./server.js";
@@ -26,33 +25,52 @@ type DaemonParams = {
 };
 
 export class Daemon {
+  /**
+   * Constructs an instance of the class Daemon, called from the create class method.
+   *
+   * @param platform - The platform instance used by the class.
+   * @param server - The server instance created by the `createServer` function.
+   */
   constructor(
     private platform: Platform,
-    private server: Server,
+    private server: ReturnType<typeof createServer>,
   ) {}
 
-  static async create(params: DaemonParams) {
+  /**
+   * Creates a new Daemon instance.
+   * @param params - The parameters required to create the Daemon.
+   * @returns A promise that resolves to a Daemon instance.
+   */
+  static async create(params: DaemonParams): Promise<Daemon> {
     const platform = await bootstrapPlatform();
     logger.info("✅ Platform bootstrapped successfully");
 
-    const server = createServer(params.server).listen();
+    const server = createServer(params.server);
+    await server.listen();
+
     logger.info(`RPC Server listening on port ${params.server.port}`);
     logger.info(`OpenTrader UI: http://localhost:${params.server.port}`);
 
     return new Daemon(platform, server);
   }
 
+  /**
+   * Restarts the Daemon by shutting down the platform and bootstrapping it again.
+   */
   async restart() {
     await this.platform.shutdown();
 
     this.platform = await bootstrapPlatform();
   }
 
+  /**
+   * Shuts down the Daemon by closing the server and shutting down the platform.
+   */
   async shutdown() {
     logger.info("Shutting down Daemon...");
 
-    this.server.close();
-    logger.info("Express Server shutted down gracefully.");
+    await this.server.close();
+    logger.info("Fastify Server shutted down gracefully.");
 
     await this.platform.shutdown();
     logger.info("Processor shutted down gracefully.");

@@ -5,3 +5,5 @@ tasks:
     command: eslint . --fix
   typecheck:
     command: tsc --noEmit
+  test:
+    command: vitest
