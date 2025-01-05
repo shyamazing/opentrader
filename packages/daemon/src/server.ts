@@ -1,16 +1,12 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import superjson from "superjson";
-
-// tRPC imports
-import { appRouter } from "@opentrader/trpc";
-import { createContext } from "./trpc.js";
-
-// Fastify imports
 import Fastify from "fastify";
-import { fastifyTRPCPlugin } from "@trpc/server/adapters/fastify";
 import fastifyCors from "@fastify/cors";
 import fastifyStatic from "@fastify/static";
+import { fastifyTRPCPlugin } from "@trpc/server/adapters/fastify";
+import { appRouter } from "@opentrader/trpc";
+import { createContext } from "./trpc.js";
 
 // Path to the current file
 const __filename = fileURLToPath(import.meta.url);
