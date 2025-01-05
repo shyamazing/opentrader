@@ -16,12 +16,6 @@ import fastifyStatic from "@fastify/static";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/**
- * Options for creating a server.
- *
- * @property {string} frontendDistPath - The path to the frontend distribution files.
- * @property {number} port - The port number on which the server will listen.
- */
 export type CreateServerOptions = {
   frontendDistPath: string;
   port: number;
@@ -30,16 +24,7 @@ export type CreateServerOptions = {
 /**
  * Creates and configures a Fastify server instance with specified options.
  *
- * @param {CreateServerOptions} params - The options for creating the server.
- * @param {string} params.frontendDistPath - The path to the frontend distribution directory.
- * @param {number} params.port - The port on which the server will listen.
- *
- * @returns {object} An object containing the Fastify app instance, the server instance,
- *                   and methods to listen and close the server.
- * @returns {FastifyInstance} return.app - The Fastify app instance.
- * @returns {Server} return.server - The underlying server instance.
- * @returns {Function} return.listen - A function to start the server and listen on the specified port.
- * @returns {Function} return.close - A function to close the server.
+ * @param params - The options for creating the server.
  */
 export const createServer = (params: CreateServerOptions) => {
   const fastify = Fastify({
