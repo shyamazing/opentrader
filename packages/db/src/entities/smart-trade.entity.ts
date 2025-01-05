@@ -12,7 +12,8 @@ export type SmartTradeEntityBuilder<
   takeProfitType: TakeProfitType;
 } & EntryOrderBuilder<EntryType> &
   TakeProfitOrderBuilder<TakeProfitType> &
-  SafetyOrdersBuilder;
+  SafetyOrdersBuilder &
+  StopLossOrderBuilder;
 
 type EntryOrderBuilder<EntryType extends XEntryType> = EntryType extends "Order"
   ? {
@@ -33,6 +34,10 @@ type TakeProfitOrderBuilder<TakeProfitType extends XTakeProfitType> = TakeProfit
     : {
         takeProfitOrders: OrderEntity[];
       };
+
+type StopLossOrderBuilder = {
+  stopLossOrder: OrderEntity | null;
+};
 
 type SafetyOrdersBuilder = {
   safetyOrders: OrderEntity[];
@@ -69,6 +74,12 @@ export function toSmartTradeEntity(entity: SmartTradeWithOrders): SmartTradeEnti
     return toOrderEntity(takeProfitOrder);
   };
 
+  const findSingleStopLossOrder = (): OrderEntity | null => {
+    const stopLossOrder = orders.find((order) => order.entityType === XEntityType.StopLossOrder);
+
+    return stopLossOrder ? toOrderEntity(stopLossOrder) : null;
+  };
+
   const findMultipleEntryOrders = (): OrderEntity[] => {
     return orders.filter((order) => order.entityType === XEntityType.EntryOrder).map(toOrderEntity);
   };
@@ -92,6 +103,7 @@ export function toSmartTradeEntity(entity: SmartTradeWithOrders): SmartTradeEnti
       entryOrder: findSingleEntryOrder(),
       takeProfitOrder: null,
       safetyOrders: findSafetyOrders(),
+      stopLossOrder: findSingleStopLossOrder(),
     };
   } else if (entryType === "Order" && takeProfitType === "Order") {
     return {
@@ -105,6 +117,7 @@ export function toSmartTradeEntity(entity: SmartTradeWithOrders): SmartTradeEnti
       entryOrder: findSingleEntryOrder(),
       takeProfitOrder: findSingleTakeProfitOrder(),
       safetyOrders: findSafetyOrders(),
+      stopLossOrder: findSingleStopLossOrder(),
     };
   } else if (entryType === "Order" && takeProfitType === "Ladder") {
     return {
@@ -118,6 +131,7 @@ export function toSmartTradeEntity(entity: SmartTradeWithOrders): SmartTradeEnti
       entryOrder: findSingleEntryOrder(),
       takeProfitOrders: findMultipleTakeProfitOrders(),
       safetyOrders: findSafetyOrders(),
+      stopLossOrder: findSingleStopLossOrder(),
     };
   } else if (entryType === "Ladder" && takeProfitType === "Order") {
     return {
@@ -131,6 +145,7 @@ export function toSmartTradeEntity(entity: SmartTradeWithOrders): SmartTradeEnti
       entryOrders: findMultipleEntryOrders(),
       takeProfitOrder: findSingleTakeProfitOrder(),
       safetyOrders: findSafetyOrders(),
+      stopLossOrder: findSingleStopLossOrder(),
     };
   } else if (entryType === "Ladder" && takeProfitType === "Ladder") {
     return {
@@ -144,6 +159,7 @@ export function toSmartTradeEntity(entity: SmartTradeWithOrders): SmartTradeEnti
       entryOrders: findMultipleEntryOrders(),
       takeProfitOrders: findMultipleTakeProfitOrders(),
       safetyOrders: findSafetyOrders(),
+      stopLossOrder: findSingleStopLossOrder(),
     };
   }
 

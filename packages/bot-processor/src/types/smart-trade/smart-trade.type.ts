@@ -4,6 +4,7 @@ type OrderBuilder<T extends OrderType, S extends OrderStatusEnum> = {
   type: T;
   status: S;
   price: T extends "Limit" ? number : undefined;
+  stopPrice?: number;
   filledPrice: S extends "filled" ? number : undefined;
   /**
    * Creation time, Unix timestamp format in milliseconds, e.g. `1597026383085`
@@ -33,6 +34,7 @@ type SmartTradeBuilder<WithSell extends boolean> = {
   quantity: number;
   buy: Order;
   sell: WithSell extends true ? Order : undefined;
+  sl?: Order;
   type: XSmartTradeType;
 };
 

@@ -7,6 +7,7 @@ export function toPrismaOrder(
     type?: OrderType;
     status?: OrderStatusEnum;
     price?: number;
+    stopPrice?: number;
     relativePrice?: number;
   },
   quantity: number,
@@ -20,6 +21,7 @@ export function toPrismaOrder(
     type: order.type || OrderType.Limit,
     entityType,
     price: order.price,
+    stopPrice: order.stopPrice,
     relativePrice: order.relativePrice,
     // Must be a number when Order["status"] is Filled to satisfy
     // Order entity type.

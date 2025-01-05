@@ -17,7 +17,7 @@ export class Bot {
   ) {}
 
   async start() {
-    eventBus.beforeBotStarted(this.bot);
+    await eventBus.emit("onBeforeBotStarted", this.bot);
 
     // 1. Exec "start" on the strategy fn
     const botProcessor = new BotProcessing(this.bot);
@@ -29,28 +29,35 @@ export class Bot {
       include: { exchangeAccount: true },
     });
 
-    // 2. Subscribe to Market and Order events
+    // 2. Place pending trades
+    const pendingSmartTrades = await botProcessor.getPendingSmartTrades();
+    for (const trade of pendingSmartTrades) {
+      await eventBus.emit("onTradeCreated", trade);
+    }
+
+    // 3. Subscribe to Market and Order events
     await this.watchStreams();
 
-    eventBus.botStarted(this.bot);
+    await eventBus.emit("onBotStarted", this.bot);
   }
 
   async stop() {
+    await eventBus.emit("onBeforeBotStopped", this.bot);
+
     // 1. Unsubscribe from Market and Order events
     this.unwatchStreams();
-
-    eventBus.beforeBotStopped(this.bot);
 
     // 2. Exec "stop" on the strategy fn
     const botProcessor = new BotProcessing(this.bot);
     await botProcessor.processStopCommand();
+
     this.bot = await xprisma.bot.custom.update({
       where: { id: this.bot.id },
       data: { enabled: false },
       include: { exchangeAccount: true },
     });
 
-    eventBus.botStopped(this.bot);
+    await eventBus.emit("onBotStopped", this.bot);
   }
 
   async watchStreams() {

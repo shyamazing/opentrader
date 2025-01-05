@@ -33,7 +33,7 @@ export async function createExchangeAccount({ input, ctx }: Options) {
     },
   });
 
-  eventBus.exchangeAccountCreated(exchangeAccount);
+  await eventBus.emit("onExchangeAccountCreated", exchangeAccount);
 
   return exchangeAccount;
 }

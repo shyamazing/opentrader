@@ -11,6 +11,7 @@ export type OrderPayload = {
   symbol?: string;
   type: OrderType;
   status?: OrderStatusEnum; // default to Idle
+  stopPrice?: number;
   price?: number; // if undefined, then it's a market order
   /**
    * Price deviation relative to entry price.
@@ -30,6 +31,7 @@ export type CreateSmartTradePayload = {
   type: XSmartTradeType;
   buy: OrderPayload;
   sell?: OrderPayload;
+  sl?: OrderPayload;
   additionalOrders?: AdditionalOrderPayload[];
   quantity: number;
 };

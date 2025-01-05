@@ -23,6 +23,11 @@ export type UseSmartTradePayload = {
     status?: OrderStatusEnum; // default to Idle
     price?: number; // if undefined, then it's a market order
   };
+  sl?: {
+    type: OrderType;
+    price?: number; // if undefined, then it's a market order
+    stopPrice: number;
+  };
   quantity: number;
 };
 
@@ -34,10 +39,7 @@ export function getSmartTrade(ref = DEFAULT_REF) {
   return makeEffect(GET_SMART_TRADE, undefined, ref);
 }
 
-export function createSmartTrade(
-  payload: UseSmartTradePayload,
-  ref = DEFAULT_REF,
-) {
+export function createSmartTrade(payload: UseSmartTradePayload, ref = DEFAULT_REF) {
   return makeEffect(CREATE_SMART_TRADE, payload, ref);
 }
 

@@ -22,7 +22,7 @@ export async function updateExchangeAccount({ input, ctx }: Options) {
 
   // It's important to trigger the event before checking the credentials
   // to invalidate the cache of ExchangeProvider.
-  eventBus.exchangeAccountUpdated(exchangeAccount);
+  await eventBus.emit("onExchangeAccountUpdated", exchangeAccount);
 
   const { valid } = await checkExchangeCredentials(exchangeAccount);
   exchangeAccount = await xprisma.exchangeAccount.update({

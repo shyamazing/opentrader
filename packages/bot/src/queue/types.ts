@@ -1,4 +1,4 @@
-import type { TBotWithExchangeAccount } from '@opentrader/db';
+import type { TBotWithExchangeAccount } from "@opentrader/db";
 import { MarketEvent, MarketId, MarketEventType } from "@opentrader/types";
 
 export type OrderFilledEvent = {
@@ -7,6 +7,12 @@ export type OrderFilledEvent = {
   orderId: number;
 };
 
-export type ProcessingEvent = MarketEvent | OrderFilledEvent;
+export type TradeCompletedEvent = {
+  type: "onTradeCompleted";
+  marketId: MarketId;
+  tradeId: number;
+};
+
+export type ProcessingEvent = MarketEvent | OrderFilledEvent | TradeCompletedEvent;
 
 export type QueueEvent = ProcessingEvent & { bot: TBotWithExchangeAccount; subscribedMarkets: MarketId[] };

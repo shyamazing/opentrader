@@ -28,7 +28,7 @@ export function toSmartTradeIteratorResult(smartTrade: SmartTradeEntity): Proces
     throw new Error('toSmartTradeIteratorResult: SmartTrade with "takeProfitType = Ladder" is not supported yet');
   }
 
-  const { entryOrder, takeProfitOrder } = smartTrade;
+  const { entryOrder, takeProfitOrder, stopLossOrder } = smartTrade;
 
   const nullToUndefined = (price: number | null): any => price || undefined; // any as a workaround
 
@@ -53,6 +53,17 @@ export function toSmartTradeIteratorResult(smartTrade: SmartTradeEntity): Proces
           filledPrice: nullToUndefined(takeProfitOrder.filledPrice), // workaround
           createdAt: takeProfitOrder.createdAt.getTime(),
           updatedAt: takeProfitOrder.updatedAt.getTime(),
+        }
+      : undefined,
+    sl: stopLossOrder
+      ? {
+          type: stopLossOrder.type,
+          status: toProcessorOrderStatus(stopLossOrder.status),
+          price: nullToUndefined(stopLossOrder.price),
+          stopPrice: nullToUndefined(stopLossOrder.stopPrice),
+          filledPrice: nullToUndefined(stopLossOrder.filledPrice),
+          createdAt: stopLossOrder.createdAt.getTime(),
+          updatedAt: stopLossOrder.updatedAt.getTime(),
         }
       : undefined,
   };

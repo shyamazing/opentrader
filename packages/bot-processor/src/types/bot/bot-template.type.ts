@@ -93,5 +93,6 @@ export interface BotTemplate<T extends IBotConfiguration> {
     [MarketEventType.onOrderbookChange]?: boolean | ((botConfig: T) => boolean);
     [MarketEventType.onTickerChange]?: boolean | ((botConfig: T) => boolean);
     [MarketEventType.onOrderFilled]?: boolean | ((botConfig: T) => boolean);
+    [MarketEventType.onTradeCompleted]?: boolean | ((botConfig: T) => boolean);
   };
 }

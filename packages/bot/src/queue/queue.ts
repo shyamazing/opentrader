@@ -1,3 +1,4 @@
+import { eventBus } from "@opentrader/event-bus";
 import { cargoQueue, QueueObject } from "async";
 import type { TBot } from "@opentrader/db";
 import { BotProcessing } from "@opentrader/processing";
@@ -22,7 +23,10 @@ async function queueHandler(tasks: QueueEvent[]) {
     markets: store.getMarkets(event.subscribedMarkets),
   });
 
-  await botProcessor.placePendingOrders();
+  const pendingSmartTrades = await botProcessor.getPendingSmartTrades();
+  for (const trade of pendingSmartTrades) {
+    await eventBus.emit("onTradeCreated", trade);
+  }
 }
 
 const createQueue = () => cargoQueue<QueueEvent>(queueHandler);

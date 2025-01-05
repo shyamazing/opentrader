@@ -8,7 +8,7 @@ export function toPrismaSmartTrade(
   bot: Pick<TBot, "id" | "symbol" | "exchangeAccountId" | "ownerId">,
   ref: string,
 ): Prisma.SmartTradeCreateInput {
-  const { buy, sell, quantity } = smartTrade;
+  const { buy, sell, sl, quantity } = smartTrade;
 
   const buyExchangeAccountId = buy.exchange || bot.exchangeAccountId;
   const buySymbol = buy.symbol || bot.symbol;
@@ -25,6 +25,10 @@ export function toPrismaSmartTrade(
   const sellSymbol = sell?.symbol || bot.symbol;
   const sellOrderData = sell
     ? toPrismaOrder(sell, quantity, XOrderSide.Sell, XEntityType.TakeProfitOrder, sellExchangeAccountId, sellSymbol)
+    : undefined;
+
+  const stopLossOrderData = sl
+    ? toPrismaOrder(sl, quantity, XOrderSide.Sell, XEntityType.StopLossOrder, sellExchangeAccountId, sellSymbol)
     : undefined;
 
   const additionalOrders =
@@ -49,7 +53,7 @@ export function toPrismaSmartTrade(
 
     orders: {
       createMany: {
-        data: sellOrderData ? [buyOrderData, sellOrderData, ...additionalOrders] : [buyOrderData, ...additionalOrders],
+        data: [buyOrderData, sellOrderData, stopLossOrderData, ...additionalOrders].filter((order) => !!order),
       },
     },
 

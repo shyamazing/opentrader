@@ -71,7 +71,7 @@ gridBot.schema = z.object({
   ),
 });
 gridBot.runPolicy = {
-  onOrderFilled: true,
+  onTradeCompleted: true,
 };
 
 export type GridBotConfig = IBotConfiguration<z.infer<typeof gridBot.schema>>;

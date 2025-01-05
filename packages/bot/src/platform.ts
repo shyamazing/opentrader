@@ -1,24 +1,35 @@
 import { findStrategy, loadCustomStrategies } from "@opentrader/bot-templates/server";
-import { xprisma, type ExchangeAccountWithCredentials, TBotWithExchangeAccount } from "@opentrader/db";
+import {
+  xprisma,
+  type ExchangeAccountWithCredentials,
+  TBotWithExchangeAccount,
+  SmartTradeWithOrders,
+} from "@opentrader/db";
 import { logger } from "@opentrader/logger";
 import { exchangeProvider } from "@opentrader/exchanges";
 import { BotProcessing } from "@opentrader/processing";
 import { eventBus } from "@opentrader/event-bus";
 import { store } from "@opentrader/bot-store";
 import { MarketEvent } from "@opentrader/types";
+import { EventEmitter } from "node:events";
 import { Bot } from "./bot.manager.js";
 
 import { MarketsStream } from "./streams/markets.stream.js";
-import { OrdersStream } from "./streams/orders.stream.js";
+import { OrderEvent, OrdersStream } from "./streams/orders.stream.js";
+import { TradeManager } from "./trade.manager.js";
 
 export class Platform {
   private ordersStream: OrdersStream;
   private marketStream: MarketsStream;
   private unsubscribeFromEventBus = () => {};
   private enabledBots: Bot[] = [];
+  private trades: TradeManager[] = [];
 
   constructor(exchangeAccounts: ExchangeAccountWithCredentials[]) {
+    EventEmitter.defaultMaxListeners = 0; // Disable Node.js max listeners warning
+
     this.ordersStream = new OrdersStream(exchangeAccounts);
+    this.ordersStream.on("order", this.handleOrderEvent);
 
     this.marketStream = new MarketsStream(this.enabledBots.map(({ bot }) => bot));
     this.marketStream.on("market", this.handleMarketEvent);
@@ -136,19 +147,34 @@ export class Platform {
     const onBeforeBotStarted = async (_data: TBotWithExchangeAccount) => {
       //
     };
-    const onBotStarted = async (data: TBotWithExchangeAccount) => {
+
+    const startBot = async (data: TBotWithExchangeAccount) => {
       const bot = new Bot(data, this.marketStream, this.ordersStream);
-      await bot.watchStreams();
+      await bot.start();
       this.enabledBots.push(bot);
     };
 
-    const onBeforeBotStopped = async (data: TBotWithExchangeAccount) => {
+    const onBotStarted = async (_data: TBotWithExchangeAccount) => {
+      //
+    };
+
+    const stopBot = async (data: TBotWithExchangeAccount) => {
       const bot = this.enabledBots.find(({ bot }) => bot.id === data.id);
+
       if (bot) {
-        bot.unwatchStreams();
-      } else {
-        logger.warn(`onBeforeBotStopped: Bot not found [id=${data.id} name=${data.name}]`);
+        const botTrades = this.trades.filter((trade) => trade.smartTrade.botId === bot.bot.id);
+        for (const trade of botTrades) {
+          trade.unwatchStreams();
+        }
+        this.trades = this.trades.filter(({ smartTrade }) => smartTrade.botId !== bot.bot.id);
+
+        await bot.stop();
+        this.enabledBots = this.enabledBots.filter((enabledBot) => enabledBot !== bot);
       }
+    };
+
+    const onBeforeBotStopped = async (_data: TBotWithExchangeAccount) => {
+      //
     };
 
     const onBotStopped = async (data: TBotWithExchangeAccount) => {
@@ -169,25 +195,53 @@ export class Platform {
       await this.ordersStream.updateExchangeAccount(exchangeAccount);
     };
 
+    const onTradeCreated = async (trade: SmartTradeWithOrders) => {
+      let tradeManager = this.trades.find(({ smartTrade }) => smartTrade.id === trade.id);
+      if (!tradeManager) {
+        tradeManager = new TradeManager(trade, this.ordersStream);
+        this.trades.push(tradeManager);
+      }
+
+      await tradeManager.next();
+    };
+
+    const onTradeCompleted = async (trade: SmartTradeWithOrders) => {
+      this.trades = this.trades.filter(({ smartTrade }) => smartTrade.id !== trade.id);
+    };
+
+    eventBus.on("startBot", startBot);
     eventBus.on("onBeforeBotStarted", onBeforeBotStarted);
     eventBus.on("onBotStarted", onBotStarted);
+    eventBus.on("stopBot", stopBot);
     eventBus.on("onBeforeBotStopped", onBeforeBotStopped);
     eventBus.on("onBotStopped", onBotStopped);
     eventBus.on("onExchangeAccountCreated", addExchangeAccount);
     eventBus.on("onExchangeAccountDeleted", removeExchangeAccount);
     eventBus.on("onExchangeAccountUpdated", updateExchangeAccount);
+    eventBus.on("onTradeCreated", onTradeCreated);
+    eventBus.on("onTradeCompleted", onTradeCompleted);
 
     // Return unsubscribe function
     return () => {
+      eventBus.off("startBot", startBot);
+      eventBus.off("onBeforeBotStarted", onBeforeBotStarted);
       eventBus.off("onBotStarted", onBotStarted);
+      eventBus.off("stopBot", stopBot);
+      eventBus.off("onBeforeBotStopped", onBeforeBotStopped);
       eventBus.off("onBotStopped", onBotStopped);
       eventBus.off("onExchangeAccountCreated", addExchangeAccount);
       eventBus.off("onExchangeAccountDeleted", removeExchangeAccount);
       eventBus.off("onExchangeAccountUpdated", updateExchangeAccount);
+      eventBus.off("onTradeCreated", onTradeCreated);
+      eventBus.off("onTradeCompleted", onTradeCompleted);
     };
   }
 
   handleMarketEvent = (event: MarketEvent) => {
     store.updateMarket(event);
+  };
+
+  handleOrderEvent = async (_event: OrderEvent) => {
+    //
   };
 }

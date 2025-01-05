@@ -16,49 +16,27 @@
  * Repository URL: https://github.com/bludnic/opentrader
  */
 
-import { ExchangeAccountWithCredentials, TBotWithExchangeAccount } from "@opentrader/db";
-import { EventEmitter } from "node:events";
+import { ExchangeAccountWithCredentials, SmartTradeWithOrders, TBotWithExchangeAccount } from "@opentrader/db";
+import Emittery from "emittery";
 
-export const EVENT = {
-  onExchangeAccountCreated: "onExchangeAccountCreated",
-  onExchangeAccountDeleted: "onExchangeAccountDeleted",
-  onExchangeAccountUpdated: "onExchangeAccountUpdated",
-  onBotCreated: "onBotCreated",
-  onBotStarted: "onBotStarted",
-  onBotStopped: "onBotStopped",
-} as const;
+export const eventBus = new Emittery<{
+  // Exchange Account events
+  onExchangeAccountCreated: ExchangeAccountWithCredentials;
+  onExchangeAccountDeleted: ExchangeAccountWithCredentials;
+  onExchangeAccountUpdated: ExchangeAccountWithCredentials;
 
-/**
- * Event bus between Backend and tRPC.
- *
- * Emits:
- * - `onExchangeAccountCreated: ExchangeAccountWithCredentials` - When an exchange account is created.
- * - `onBotCreated: TBot` - When a bot is created.
- */
-class EventBus extends EventEmitter {
-  exchangeAccountCreated(exchangeAccount: ExchangeAccountWithCredentials) {
-    this.emit(EVENT.onExchangeAccountCreated, exchangeAccount);
-  }
+  // Bot events
+  onBotCreated: TBotWithExchangeAccount;
+  startBot: TBotWithExchangeAccount;
+  onBeforeBotStarted: TBotWithExchangeAccount;
+  onBotStarted: TBotWithExchangeAccount;
+  stopBot: TBotWithExchangeAccount;
+  onBeforeBotStopped: TBotWithExchangeAccount;
+  onBotStopped: TBotWithExchangeAccount;
 
-  exchangeAccountDeleted(exchangeAccount: ExchangeAccountWithCredentials) {
-    this.emit(EVENT.onExchangeAccountDeleted, exchangeAccount);
-  }
-
-  exchangeAccountUpdated(exchangeAccount: ExchangeAccountWithCredentials) {
-    this.emit(EVENT.onExchangeAccountUpdated, exchangeAccount);
-  }
-
-  botCreated(bot: TBotWithExchangeAccount) {
-    this.emit(EVENT.onBotCreated, bot);
-  }
-
-  botStarted(bot: TBotWithExchangeAccount) {
-    this.emit(EVENT.onBotStarted, bot);
-  }
-
-  botStopped(bot: TBotWithExchangeAccount) {
-    this.emit(EVENT.onBotStopped, bot);
-  }
-}
-
-export const eventBus = new EventBus();
+  // Trade events
+  cancelTrade: SmartTradeWithOrders;
+  onTradeCreated: SmartTradeWithOrders;
+  onTradeUpdated: SmartTradeWithOrders;
+  onTradeCompleted: SmartTradeWithOrders;
+}>();

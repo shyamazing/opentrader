@@ -18,6 +18,7 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@opentrader/db": "workspace:*"
+    "@opentrader/db": "workspace:*",
+    "emittery": "^1.0.3"
   }
 }
