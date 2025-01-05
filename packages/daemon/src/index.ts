@@ -27,7 +27,7 @@ type DaemonParams = {
 export class Daemon {
   /**
    * Constructs an instance of the class Daemon, called from the create class method.
-   * 
+   *
    * @param platform - The platform instance used by the class.
    * @param server - The server instance created by the `createServer` function.
    */
@@ -42,27 +42,16 @@ export class Daemon {
    * @returns A promise that resolves to a Daemon instance.
    */
   static async create(params: DaemonParams): Promise<Daemon> {
-    try {
-      logger.info("Bootstrapping platform...");
-      const platform = await bootstrapPlatform();
-      logger.info("✅ Platform bootstrapped successfully");
+    const platform = await bootstrapPlatform();
+    logger.info("✅ Platform bootstrapped successfully");
 
-      const server = createServer(params.server);
+    const server = createServer(params.server);
+    await server.listen();
 
-      try {
-        server.listen();
-      } catch (error) {
-        logger.error("Error during server start:", error);
-        throw error;
-      }
-      logger.info(`RPC Server listening on port ${params.server.port}`);
-      logger.info(`OpenTrader UI: http://localhost:${params.server.port}`);
+    logger.info(`RPC Server listening on port ${params.server.port}`);
+    logger.info(`OpenTrader UI: http://localhost:${params.server.port}`);
 
-      return new Daemon(platform, server);
-    } catch (error) {
-      logger.error("Error during Daemon creation:", error);
-      throw error;
-    }
+    return new Daemon(platform, server);
   }
 
   /**

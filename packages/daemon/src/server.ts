@@ -1,26 +1,24 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import superjson from 'superjson';
+import superjson from "superjson";
 
 // tRPC imports
 import { appRouter } from "@opentrader/trpc";
 import { createContext } from "./trpc.js";
 
-
 // Fastify imports
-import Fastify from 'fastify';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import fastifyCors from '@fastify/cors';
-import fastifyStatic from '@fastify/static';
+import Fastify from "fastify";
+import { fastifyTRPCPlugin } from "@trpc/server/adapters/fastify";
+import fastifyCors from "@fastify/cors";
+import fastifyStatic from "@fastify/static";
 
 // Path to the current file
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
 /**
  * Options for creating a server.
- * 
+ *
  * @property {string} frontendDistPath - The path to the frontend distribution files.
  * @property {number} port - The port number on which the server will listen.
  */
@@ -29,7 +27,6 @@ export type CreateServerOptions = {
   port: number;
 };
 
-
 /**
  * Creates and configures a Fastify server instance with specified options.
  *
@@ -37,7 +34,7 @@ export type CreateServerOptions = {
  * @param {string} params.frontendDistPath - The path to the frontend distribution directory.
  * @param {number} params.port - The port on which the server will listen.
  *
- * @returns {object} An object containing the Fastify app instance, the server instance, 
+ * @returns {object} An object containing the Fastify app instance, the server instance,
  *                   and methods to listen and close the server.
  * @returns {FastifyInstance} return.app - The Fastify app instance.
  * @returns {Server} return.server - The underlying server instance.
@@ -57,11 +54,11 @@ export const createServer = (params: CreateServerOptions) => {
 
   fastify.register(fastifyStatic, {
     root: staticDir,
-    prefix: '/', // optional: default '/'
+    prefix: "/", // optional: default '/'
   });
 
   fastify.register(fastifyTRPCPlugin, {
-    prefix: '/api/trpc',
+    prefix: "/api/trpc",
     trpcOptions: {
       router: appRouter,
       createContext: createContext as () => ReturnType<typeof createContext>,
@@ -73,16 +70,10 @@ export const createServer = (params: CreateServerOptions) => {
     app: fastify,
     server: fastify.server,
     listen: async () => {
-      try {
-        await fastify.listen({ port: params.port, host: '0.0.0.0' }); // Listen on all interfaces, remove host to listen only on localhost
-        fastify.log.debug(`Server listening at http://localhost:${params.port}`);
-      } catch (err) {
-        fastify.log.error(err);
-        process.exit(1);
-      }
+      await fastify.listen({ port: params.port, host: "0.0.0.0" }); // Listen on all interfaces, remove host to listen only on localhost
     },
     close: async () => {
       await fastify.close();
-    }
+    },
   };
 };
