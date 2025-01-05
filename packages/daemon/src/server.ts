@@ -43,7 +43,6 @@ export const createServer = (params: CreateServerOptions) => {
     trpcOptions: {
       router: appRouter,
       createContext: createContext as () => ReturnType<typeof createContext>,
-      transformer: superjson, // matching the transformer used in the client
     },
   });
 
