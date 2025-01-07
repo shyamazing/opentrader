@@ -32,13 +32,15 @@ export async function up(options: Options): Promise<CommandResult> {
   }
 
   const daemonProcess = isDevelopment
-    ? spawn("ts-node", [join(__dirname, "daemon.ts"), "--port", options.port.toString()], {
+    ? spawn("ts-node", [join(__dirname, "daemon.ts")], {
         detached: options.detach,
         stdio: options.detach ? "ignore" : undefined,
+        env: { ...process.env, PORT: options.port.toString() },
       })
-    : spawn("node", [join(__dirname, "daemon.mjs"), "--port", options.port.toString()], {
+    : spawn("node", [join(__dirname, "daemon.mjs")], {
         detached: options.detach,
         stdio: options.detach ? "ignore" : undefined,
+        env: { ...process.env, PORT: options.port.toString() },
       });
 
   if (daemonProcess.pid === undefined) {
