@@ -14,6 +14,7 @@ const __dirname = path.dirname(__filename);
 export type CreateServerOptions = {
   frontendDistPath: string;
   port: number;
+  domain: string;
 };
 
 /**

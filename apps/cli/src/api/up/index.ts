@@ -18,6 +18,7 @@ function getAbsoluteStrategiesPath(strategiesPath: string) {
 type Options = {
   detach: boolean;
   port: number;
+  domain: string;
 };
 
 export async function up(options: Options): Promise<CommandResult> {
@@ -35,12 +36,12 @@ export async function up(options: Options): Promise<CommandResult> {
     ? spawn("ts-node", [join(__dirname, "daemon.ts")], {
         detached: options.detach,
         stdio: options.detach ? "ignore" : undefined,
-        env: { ...process.env, PORT: options.port.toString() },
+        env: { ...process.env, PORT: options.port.toString(), DOMAIN: options.domain },
       })
     : spawn("node", [join(__dirname, "daemon.mjs")], {
         detached: options.detach,
         stdio: options.detach ? "ignore" : undefined,
-        env: { ...process.env, PORT: options.port.toString() },
+        env: { ...process.env, PORT: options.port.toString(), DOMAIN: options.domain },
       });
 
   if (daemonProcess.pid === undefined) {
