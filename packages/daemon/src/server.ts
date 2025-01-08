@@ -50,7 +50,7 @@ export const createServer = (params: CreateServerOptions) => {
     app: fastify,
     server: fastify.server,
     listen: async () => {
-      await fastify.listen({ port: params.port, host: "0.0.0.0" }); // Listen on all interfaces, remove host to listen only on localhost
+      await fastify.listen({ port: params.port, host: params.domain }); // Listen on all interfaces, remove host to listen only on localhost
     },
     close: async () => {
       await fastify.close();
