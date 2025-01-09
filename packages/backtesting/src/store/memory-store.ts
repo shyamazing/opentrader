@@ -37,7 +37,6 @@ export class MemoryStore implements IStore {
   async createSmartTrade(ref: string, payload: CreateTrade, _botId: number): Promise<Trade> {
     const candlestick = this.marketSimulator.currentCandle;
 
-    const docId = uniqueId("id_");
     const { type, entry, tp } = payload;
     if (type !== "Trade") throw new Error(`Trade with type ${type} is not supported in backtesting`);
 
@@ -46,10 +45,10 @@ export class MemoryStore implements IStore {
     let buyOrder: Order;
     let sellOrder: Order | undefined = undefined;
 
-    const buyOrderStatus = entry.status || XOrderStatus.Idle;
+    const entryOrderStatus = entry.status || XOrderStatus.Idle;
 
     if (entry.type === "Market") {
-      switch (buyOrderStatus) {
+      switch (entryOrderStatus) {
         case "Filled":
           if (!entry.price) {
             throw new Error(`Bought "price" is required for sell only trades`);
@@ -64,7 +63,7 @@ export class MemoryStore implements IStore {
             type: XOrderType.Market,
             price: undefined,
             filledPrice: entry.price,
-            status: XOrderStatus.Filled,
+            status: entryOrderStatus,
             createdAt,
             updatedAt: createdAt,
           };
@@ -82,7 +81,7 @@ export class MemoryStore implements IStore {
             type: XOrderType.Market,
             price: undefined,
             filledPrice: undefined,
-            status: XOrderStatus.Idle,
+            status: entryOrderStatus,
             createdAt,
             updatedAt: createdAt,
           };
@@ -96,7 +95,7 @@ export class MemoryStore implements IStore {
         throw new Error(`"price" is required for Limit entry order`);
       }
 
-      switch (entry.status) {
+      switch (entryOrderStatus) {
         case "Filled":
           buyOrder = {
             id: new Date().getTime(),
@@ -108,7 +107,7 @@ export class MemoryStore implements IStore {
             type: XOrderType.Limit,
             price: entry.price,
             filledPrice: entry.price,
-            status: XOrderStatus.Filled,
+            status: entryOrderStatus,
             createdAt,
             updatedAt: createdAt,
           };
@@ -126,7 +125,7 @@ export class MemoryStore implements IStore {
             type: XOrderType.Limit,
             price: entry.price,
             filledPrice: undefined,
-            status: XOrderStatus.Idle,
+            status: entryOrderStatus,
             createdAt,
             updatedAt: createdAt,
           };
@@ -137,7 +136,9 @@ export class MemoryStore implements IStore {
     }
 
     if (tp?.type === "Market") {
-      switch (tp.status) {
+      const tpOrderStatus = tp.status || XOrderStatus.Idle;
+
+      switch (tpOrderStatus) {
         case "Filled":
           throw new Error('Marking TP order as "filled" is not supported');
         case "Placed":
@@ -153,7 +154,7 @@ export class MemoryStore implements IStore {
             type: XOrderType.Market,
             price: undefined,
             filledPrice: undefined,
-            status: XOrderStatus.Idle,
+            status: tpOrderStatus,
             createdAt,
             updatedAt: createdAt,
           };
@@ -166,7 +167,9 @@ export class MemoryStore implements IStore {
         throw new Error(`"price" is required for Limit tp orders`);
       }
 
-      switch (tp.status) {
+      const tpOrderStatus = tp.status || XOrderStatus.Idle;
+
+      switch (tpOrderStatus) {
         case "Filled":
           throw new Error('Marking TP order as "filled" is not supported');
         case "Placed":
@@ -182,7 +185,7 @@ export class MemoryStore implements IStore {
             type: XOrderType.Limit,
             price: tp.price,
             filledPrice: undefined,
-            status: XOrderStatus.Idle,
+            status: tpOrderStatus,
             createdAt,
             updatedAt: createdAt,
           };
@@ -250,7 +253,7 @@ export class MemoryStore implements IStore {
             type: XOrderType.Market,
             price: undefined,
             filledPrice: undefined,
-            status: XOrderStatus.Idle,
+            status: orderStatus,
             createdAt: updatedAt,
             updatedAt,
           };
