@@ -17,8 +17,8 @@
  */
 import { rsi, ema, sma } from "@opentrader/indicators";
 import { aggregateCandles, IndicatorsValues } from "@opentrader/tools";
-import { OrderStatusEnum, OrderType, XEntityType, XOrderSide } from "@opentrader/types";
-import { TradeService, SmartTradeService } from "./types/index.js";
+import { XOrderSide, XOrderStatus, XOrderType } from "@opentrader/types";
+import { SmartTradeService } from "./types/index.js";
 import type { TBotContext } from "./types/index.js";
 import { BaseEffect, EffectType, USE_DCA, USE_INDICATOR } from "./effects/types/index.js";
 import {
@@ -78,13 +78,16 @@ export const effectRunnerMap: Record<
   [USE_RSI_INDICATOR]: runUseRsiIndicatorEffect,
 };
 
-async function runUseSmartTradeEffect(
+export async function runUseSmartTradeEffect(
   effect: ReturnType<typeof useSmartTrade>,
   ctx: TBotContext<any>,
 ): Promise<SmartTradeService> {
+  const { entry, tp, sl, quantity } = effect.payload;
   const smartTrade = await ctx.control.getOrCreateSmartTrade(effect.ref, {
-    ...effect.payload,
     type: "Trade",
+    entry: { quantity, ...entry },
+    tp: tp ? { quantity, ...tp } : undefined,
+    sl: sl ? { quantity, ...sl } : undefined,
   });
 
   return new SmartTradeService(effect.ref, smartTrade);
@@ -101,9 +104,12 @@ async function runCancelSmartTradeEffect(effect: ReturnType<typeof cancelSmartTr
 }
 
 async function runCreateSmartTradeEffect(effect: ReturnType<typeof createSmartTrade>, ctx: TBotContext<any>) {
+  const { entry, tp, sl, quantity } = effect.payload;
   const smartTrade = await ctx.control.createSmartTrade(effect.ref, {
-    ...effect.payload,
     type: "Trade",
+    entry: { quantity, ...entry },
+    tp: tp ? { quantity, ...tp } : undefined,
+    sl: sl ? { quantity, ...sl } : undefined,
   });
 
   return new SmartTradeService(effect.ref, smartTrade);
@@ -116,74 +122,7 @@ async function runReplaceSmartTradeEffect(effect: ReturnType<typeof replaceSmart
 }
 
 async function runUseTradeEffect(effect: ReturnType<typeof useTrade>, ctx: TBotContext<any>) {
-  const { payload, ref } = effect;
-
-  let buy;
-  const sell =
-    payload.takeProfitType === OrderType.Market
-      ? {
-          type: OrderType.Market,
-          status: OrderStatusEnum.Idle,
-        }
-      : payload.tp
-        ? {
-            type: OrderType.Limit,
-            status: OrderStatusEnum.Idle,
-            price: payload.tp,
-          }
-        : undefined;
-
-  /**
-   * Side "sell" means that the base asset was bought the user directly on the exchange.
-   * So, the bot should only sell it.
-   * We need to create a smart trade with a buy order already filled.
-   * The bought "price" is mandatory, to calculate the profit after trade finished.
-   */
-  if (payload.side === "sell") {
-    if (!payload.price) {
-      throw new Error(`Bought "price" is required for sell only orders`);
-    }
-
-    buy = {
-      type: OrderType.Limit,
-      price: payload.price,
-      status: OrderStatusEnum.Filled,
-    };
-  } else {
-    // side == "buy"
-    const entryType = payload.entryType || OrderType.Limit;
-
-    switch (entryType) {
-      case "Limit":
-        if (!payload.price) {
-          throw new Error(`"price" is required for Limit entry order`);
-        }
-
-        buy = {
-          type: OrderType.Limit,
-          status: OrderStatusEnum.Idle,
-          price: payload.price,
-        };
-        break;
-      case "Market":
-        buy = {
-          type: OrderType.Market,
-          status: OrderStatusEnum.Idle,
-        };
-        break;
-      default:
-        throw new Error(`Invalid entry type: ${payload.entryType}`);
-    }
-  }
-
-  const smartTrade = await ctx.control.getOrCreateSmartTrade(ref, {
-    type: "Trade",
-    quantity: payload.quantity,
-    buy,
-    sell,
-  });
-
-  return new SmartTradeService(effect.ref, smartTrade);
+  throw new Error("useTrade is deprecated");
 }
 
 async function runUseArbTradeEffect(effect: ReturnType<typeof useArbTrade>, ctx: TBotContext<any>) {
@@ -191,20 +130,21 @@ async function runUseArbTradeEffect(effect: ReturnType<typeof useArbTrade>, ctx:
 
   const smartTrade = await ctx.control.getOrCreateSmartTrade(ref, {
     type: "ARB",
-    quantity: payload.quantity,
-    buy: {
-      exchange: payload.exchange1,
+    entry: {
+      exchangeAccountId: payload.exchange1,
       symbol: payload.symbol,
-      type: payload.price ? OrderType.Limit : OrderType.Market,
+      side: XOrderSide.Buy,
+      type: payload.price ? XOrderType.Limit : XOrderType.Market,
       price: payload.price,
-      status: OrderStatusEnum.Idle,
+      quantity: payload.quantity,
     },
-    sell: {
-      exchange: payload.exchange2,
+    tp: {
+      exchangeAccountId: payload.exchange2,
       symbol: payload.symbol,
-      type: payload.tp ? OrderType.Limit : OrderType.Market,
+      side: XOrderSide.Sell,
+      type: payload.tp ? XOrderType.Limit : XOrderType.Market,
       price: payload.tp,
-      status: OrderStatusEnum.Idle,
+      quantity: payload.quantity,
     },
   });
 
@@ -216,27 +156,26 @@ async function runUseDcaEffect(effect: ReturnType<typeof useDca>, ctx: TBotConte
 
   const smartTrade = await ctx.control.getOrCreateSmartTrade(ref, {
     type: "DCA",
-    quantity: payload.quantity,
-    buy: {
+    entry: {
       symbol: payload.symbol,
-      type: payload.price ? OrderType.Limit : OrderType.Market,
+      type: payload.price ? XOrderType.Limit : XOrderType.Market,
+      side: XOrderSide.Buy,
       price: payload.price,
-      status: OrderStatusEnum.Idle,
+      quantity: payload.quantity,
     },
-    sell: {
+    tp: {
       symbol: payload.symbol,
-      type: OrderType.Limit,
+      type: XOrderType.Limit,
+      side: XOrderSide.Sell,
       relativePrice: payload.tpPercent,
-      status: OrderStatusEnum.Idle,
+      quantity: payload.quantity,
     },
-    // Safety orders
-    additionalOrders: payload.safetyOrders.map((order) => ({
+    safetyOrders: payload.safetyOrders.map((order) => ({
       relativePrice: order.relativePrice,
       quantity: order.quantity,
       symbol: payload.symbol,
-      type: OrderType.Limit,
+      type: XOrderType.Limit,
       side: XOrderSide.Buy,
-      entityType: XEntityType.SafetyOrder,
     })),
   });
 
@@ -246,12 +185,14 @@ async function runUseDcaEffect(effect: ReturnType<typeof useDca>, ctx: TBotConte
 async function runBuyEffect(effect: ReturnType<typeof buy>, ctx: TBotContext<any>) {
   const { payload, ref } = effect;
 
-  let buy;
+  let entry;
 
-  if (payload.orderType === OrderType.Market) {
-    buy = {
-      type: OrderType.Market,
-      status: OrderStatusEnum.Idle,
+  if (payload.orderType === XOrderType.Market) {
+    entry = {
+      type: XOrderType.Market,
+      side: XOrderSide.Buy,
+      status: XOrderStatus.Idle,
+      quantity: payload.quantity,
     };
   } else {
     // OrderType.Limit
@@ -259,30 +200,30 @@ async function runBuyEffect(effect: ReturnType<typeof buy>, ctx: TBotContext<any
       throw new Error(`"price" is required for Limit buy orders`);
     }
 
-    buy = {
-      type: OrderType.Limit,
-      status: OrderStatusEnum.Idle,
+    entry = {
+      type: XOrderType.Limit,
+      side: XOrderSide.Sell,
+      status: XOrderStatus.Idle,
       price: payload.price,
+      quantity: payload.quantity,
     };
   }
 
   let smartTrade = await ctx.control.getOrCreateSmartTrade(ref, {
     type: "Trade",
-    quantity: payload.quantity,
-    buy,
+    entry,
   });
 
-  if (smartTrade.sell?.status === OrderStatusEnum.Filled) {
+  if (smartTrade.tpOrder?.status === XOrderStatus.Filled) {
     console.info("Trade replaced. Reason: Sell filled");
 
     smartTrade = await ctx.control.createSmartTrade(ref, {
       type: "Trade",
-      quantity: payload.quantity,
-      buy,
+      entry,
     });
   }
 
-  return new TradeService(ref, smartTrade);
+  return new SmartTradeService(ref, smartTrade);
 }
 
 async function runSellEffect(effect: ReturnType<typeof sell>, ctx: TBotContext<any>) {
@@ -295,27 +236,29 @@ async function runSellEffect(effect: ReturnType<typeof sell>, ctx: TBotContext<a
     return null;
   }
 
-  if (smartTrade.buy.status === OrderStatusEnum.Idle || smartTrade.buy.status === OrderStatusEnum.Placed) {
+  if (smartTrade.entryOrder.status === XOrderStatus.Idle || smartTrade.entryOrder.status === XOrderStatus.Placed) {
     console.info("Skip selling effect. Reason: Buy order not filled yet");
 
     return null;
   }
 
-  if (smartTrade.sell) {
+  if (smartTrade.tpOrder) {
     console.info("Skip selling advice. Reason: Already selling");
 
     return null;
   }
 
-  if (payload.orderType !== OrderType.Market && !payload.price) {
+  if (payload.orderType !== XOrderType.Market && !payload.price) {
     throw new Error(`"price" is required for Limit sell orders`);
   }
 
   smartTrade = await ctx.control.updateSmartTrade(ref, {
-    sell: {
-      type: payload.orderType || OrderType.Limit,
-      status: OrderStatusEnum.Idle,
+    tp: {
+      type: payload.orderType || XOrderType.Limit,
+      status: XOrderStatus.Idle,
+      side: XOrderSide.Buy,
       price: payload.price,
+      quantity: payload.quantity,
     },
   });
 
@@ -325,7 +268,7 @@ async function runSellEffect(effect: ReturnType<typeof sell>, ctx: TBotContext<a
     return null;
   }
 
-  return new TradeService(effect.ref, smartTrade);
+  return new SmartTradeService(effect.ref, smartTrade);
 }
 
 async function runUseExchangeEffect(effect: ReturnType<typeof useExchange>, ctx: TBotContext<any>) {

@@ -1,6 +1,6 @@
 import { table } from "table";
-import type { BotTemplate, IBotConfiguration, Order, SmartTrade } from "@opentrader/bot-processor";
-import { ICandlestick, OrderStatusEnum } from "@opentrader/types";
+import type { BotTemplate, IBotConfiguration, Order, Trade } from "@opentrader/bot-processor";
+import { ICandlestick, XOrderStatus } from "@opentrader/types";
 import { format } from "@opentrader/logger";
 import { decomposeSymbol } from "@opentrader/tools";
 import { buyOrder } from "./report/buyOrder.js";
@@ -10,14 +10,13 @@ import { sellTransaction } from "./report/sellTransaction.js";
 import type { ActiveOrder, Transaction } from "./types/index.js";
 
 type OrderInfo = Order & {
-  side: "buy" | "sell";
-  trade: SmartTrade;
+  trade: Trade;
 };
 
 export class BacktestingReport {
   constructor(
     private candlesticks: ICandlestick[],
-    private smartTrades: SmartTrade[],
+    private smartTrades: Trade[],
     private botConfig: IBotConfiguration,
     private template: BotTemplate<any>,
   ) {}
@@ -36,17 +35,17 @@ export class BacktestingReport {
     const backtestData: Array<any[]> = [["Date", "Action", "Price", "Quantity", "Amount", "Profit"]];
 
     const trades = this.getOrders().map((order) => {
-      const amount = order.filledPrice! * order.trade.quantity;
+      const amount = order.filledPrice! * order.trade.entryOrder.quantity;
       const profit =
-        order.side === "sell" && order.trade.sell
-          ? (order.trade.sell.filledPrice! - order.trade.buy.filledPrice!) * order.trade.quantity
+        order.side === "Sell" && order.trade.tpOrder
+          ? (order.trade.tpOrder.filledPrice! - order.trade.entryOrder.filledPrice!) * order.trade.entryOrder.quantity
           : "-";
 
       return [
         format.datetime(order.updatedAt),
         order.side.toUpperCase(),
         order.filledPrice,
-        order.trade.quantity,
+        order.trade.entryOrder.quantity,
         amount,
         profit,
       ];
@@ -83,21 +82,19 @@ Total Profit: ${totalProfit} ${quoteCurrency}
 
     for (const trade of this.getFinishedSmartTrades()) {
       orders.push({
-        ...trade.buy,
-        side: "buy",
+        ...trade.entryOrder,
         trade,
       });
 
-      if (trade.sell) {
+      if (trade.tpOrder) {
         orders.push({
-          ...trade.sell,
-          side: "sell",
+          ...trade.tpOrder,
           trade,
         });
       }
     }
 
-    return orders.sort((a, b) => a.updatedAt - b.updatedAt);
+    return orders.sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime());
   }
 
   getTransactions(): Transaction[] {
@@ -108,7 +105,7 @@ Total Profit: ${totalProfit} ${quoteCurrency}
     finishedSmartTrades.forEach((smartTrade) => {
       transactions.push(buyTransaction(smartTrade));
 
-      if (smartTrade.sell) {
+      if (smartTrade.tpOrder) {
         transactions.push(sellTransaction(smartTrade));
       }
     });
@@ -124,7 +121,7 @@ Total Profit: ${totalProfit} ${quoteCurrency}
     smartTrades.forEach((smartTrade) => {
       activeOrders.push(buyOrder(smartTrade));
 
-      if (smartTrade.sell) {
+      if (smartTrade.tpOrder) {
         activeOrders.push(sellOrder(smartTrade));
       }
     });
@@ -135,8 +132,10 @@ Total Profit: ${totalProfit} ${quoteCurrency}
   private calcTotalProfit(): number {
     return this.smartTrades.reduce((acc, curr) => {
       const priceDiff =
-        curr.buy.filledPrice && curr.sell?.filledPrice ? curr.sell.filledPrice - curr.buy.filledPrice : 0;
-      const profit = priceDiff * curr.quantity;
+        curr.entryOrder.filledPrice && curr.tpOrder?.filledPrice
+          ? curr.tpOrder.filledPrice - curr.entryOrder.filledPrice
+          : 0;
+      const profit = priceDiff * curr.entryOrder.quantity;
 
       return acc + profit;
     }, 0);
@@ -145,13 +144,13 @@ Total Profit: ${totalProfit} ${quoteCurrency}
   private getActiveSmartTrades() {
     return this.smartTrades.filter(
       (smartTrade) =>
-        smartTrade.buy.status === OrderStatusEnum.Placed || smartTrade.sell?.status === OrderStatusEnum.Placed,
+        smartTrade.entryOrder.status === XOrderStatus.Placed || smartTrade.tpOrder?.status === XOrderStatus.Placed,
     );
   }
 
   private getFinishedSmartTrades() {
     return this.smartTrades.filter((smartTrade) => {
-      return smartTrade.buy.status === OrderStatusEnum.Filled && smartTrade.sell?.status === OrderStatusEnum.Filled;
+      return smartTrade.entryOrder.status === XOrderStatus.Filled && smartTrade.tpOrder?.status === XOrderStatus.Filled;
     });
   }
 }

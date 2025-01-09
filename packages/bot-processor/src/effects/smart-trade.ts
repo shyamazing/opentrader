@@ -1,5 +1,5 @@
-import type { OrderStatusEnum, OrderType } from "@opentrader/types";
-import type { SmartTrade } from "../types/index.js";
+import type { XOrderSide, XOrderStatus, XOrderType } from "@opentrader/types";
+import type { Trade } from "../types/index.js";
 import {
   GET_SMART_TRADE,
   CANCEL_SMART_TRADE,
@@ -13,18 +13,21 @@ import { makeEffect } from "./utils/index.js";
 const DEFAULT_REF = "0";
 
 export type UseSmartTradePayload = {
-  buy: {
-    type: OrderType;
-    status?: OrderStatusEnum; // default to Idle
+  entry: {
+    type: XOrderType;
+    side: XOrderSide;
     price?: number; // if undefined, then it's a market order
+    status?: XOrderStatus; // default to Idle
   };
-  sell?: {
-    type: OrderType;
-    status?: OrderStatusEnum; // default to Idle
+  tp?: {
+    type: XOrderType;
+    side: XOrderSide;
     price?: number; // if undefined, then it's a market order
+    status?: XOrderStatus; // default to Idle
   };
   sl?: {
-    type: OrderType;
+    type: XOrderType;
+    side: XOrderSide;
     price?: number; // if undefined, then it's a market order
     stopPrice: number;
   };
@@ -47,6 +50,6 @@ export function cancelSmartTrade(ref = DEFAULT_REF) {
   return makeEffect(CANCEL_SMART_TRADE, undefined, ref);
 }
 
-export function replaceSmartTrade(payload: SmartTrade, ref = DEFAULT_REF) {
+export function replaceSmartTrade(payload: Trade, ref = DEFAULT_REF) {
   return makeEffect(REPLACE_SMART_TRADE, payload, ref);
 }

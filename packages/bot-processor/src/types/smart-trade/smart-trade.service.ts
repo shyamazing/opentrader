@@ -1,20 +1,24 @@
-import { OrderStatusEnum } from "@opentrader/types";
+import { XOrderStatus, XSmartTradeType } from "@opentrader/types";
 import { cancelSmartTrade, replaceSmartTrade } from "../../effects/index.js";
-import type { SmartTrade } from "./smart-trade.type.js";
+import { Trade } from "../trade/index.js";
 
 export class SmartTradeService {
-  buy: SmartTrade["buy"];
-  sell: SmartTrade["sell"];
+  type: XSmartTradeType;
+  entry: Trade["entryOrder"];
+  tp: Trade["tpOrder"];
+  sl: Trade["slOrder"];
 
   constructor(
     private ref: string,
-    private smartTrade: SmartTrade,
+    private smartTrade: Trade,
   ) {
     // Instead of assigning prop by prop
     // it is possible to use `Object.assign(this, smartTrade)`
     // but types are lost in this case
-    this.buy = smartTrade.buy;
-    this.sell = smartTrade.sell;
+    this.type = smartTrade.type;
+    this.entry = smartTrade.entryOrder;
+    this.tp = smartTrade.tpOrder;
+    this.sl = smartTrade.slOrder;
   }
 
   /**
@@ -29,8 +33,13 @@ export class SmartTradeService {
   }
 
   isCompleted(): boolean {
-    return (
-      this.smartTrade.buy.status === OrderStatusEnum.Filled && this.smartTrade.sell?.status === OrderStatusEnum.Filled
-    );
+    const closedWithTakeProfit =
+      this.smartTrade.entryOrder.status === XOrderStatus.Filled &&
+      this.smartTrade.tpOrder?.status === XOrderStatus.Filled;
+    const closedWithStopLoss =
+      this.smartTrade.entryOrder.status === XOrderStatus.Filled &&
+      this.smartTrade.slOrder?.status === XOrderStatus.Filled;
+
+    return closedWithTakeProfit || closedWithStopLoss;
   }
 }

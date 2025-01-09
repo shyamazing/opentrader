@@ -1,5 +1,4 @@
-import { OrderStatusEnum } from "@opentrader/types";
-import type { IBotConfiguration, IBotControl, SmartTrade, IStore, CreateSmartTradePayload } from "./types/index.js";
+import { IBotConfiguration, IBotControl, IStore, CreateTrade, Trade, Order } from "./types/index.js";
 
 export class BotControl<T extends IBotConfiguration> implements IBotControl {
   constructor(
@@ -15,15 +14,15 @@ export class BotControl<T extends IBotConfiguration> implements IBotControl {
     return this.store.getSmartTrade(ref, this.bot.id);
   }
 
-  async createSmartTrade(ref: string, payload: CreateSmartTradePayload) {
+  async createSmartTrade(ref: string, payload: CreateTrade) {
     return this.store.createSmartTrade(ref, payload, this.bot.id);
   }
 
-  async updateSmartTrade(ref: string, payload: Pick<CreateSmartTradePayload, "sell">) {
+  async updateSmartTrade(ref: string, payload: Pick<CreateTrade, "tp">) {
     return this.store.updateSmartTrade(ref, payload, this.bot.id);
   }
 
-  async getOrCreateSmartTrade(ref: string, payload: CreateSmartTradePayload): Promise<SmartTrade> {
+  async getOrCreateSmartTrade(ref: string, payload: CreateTrade) {
     const smartTrade = await this.store.getSmartTrade(ref, this.bot.id);
 
     if (smartTrade) {
@@ -33,25 +32,47 @@ export class BotControl<T extends IBotConfiguration> implements IBotControl {
     return this.store.createSmartTrade(ref, payload, this.bot.id);
   }
 
-  async replaceSmartTrade(ref: string, smartTrade: SmartTrade): Promise<SmartTrade> {
-    const payload: CreateSmartTradePayload = {
-      type: smartTrade.type,
-      buy: {
-        type: smartTrade.buy.type,
-        price: smartTrade.buy.price,
-        status: OrderStatusEnum.Idle,
-      },
-      sell: smartTrade.sell
-        ? {
-            type: smartTrade.sell.type,
-            price: smartTrade.sell.price,
-            status: OrderStatusEnum.Idle,
-          }
-        : undefined,
-      quantity: smartTrade.quantity,
-    };
+  async replaceSmartTrade(ref: string, smartTrade: Trade) {
+    const copyOrder = (order: Order) => ({
+      type: order.type,
+      side: order.side,
+      quantity: order.quantity,
+      price: order.price,
+      relativePrice: order.relativePrice,
+      stopPrice: order.stopPrice,
+    });
 
-    return this.store.createSmartTrade(ref, payload, this.bot.id);
+    const entry = copyOrder(smartTrade.entryOrder);
+
+    switch (smartTrade.type) {
+      case "Trade":
+        return this.store.createSmartTrade(
+          ref,
+          { type: "Trade", entry, tp: smartTrade.tpOrder ? copyOrder(smartTrade.tpOrder) : undefined },
+          this.bot.id,
+        );
+      case "DCA":
+        return this.store.createSmartTrade(
+          ref,
+          {
+            type: "DCA",
+            entry,
+            tp: copyOrder(smartTrade.tpOrder),
+            safetyOrders: smartTrade.safetyOrders.map(copyOrder),
+          },
+          this.bot.id,
+        );
+      case "ARB":
+        return this.store.createSmartTrade(
+          ref,
+          {
+            type: "ARB",
+            entry,
+            tp: copyOrder(smartTrade.tpOrder),
+          },
+          this.bot.id,
+        );
+    }
   }
 
   async cancelSmartTrade(ref: string) {

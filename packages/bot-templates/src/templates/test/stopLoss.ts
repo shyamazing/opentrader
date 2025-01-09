@@ -20,15 +20,18 @@ export function* testStopLoss(ctx: TBotContext<TestStopLossSchema>) {
 
   if (ctx.onStart) {
     const smartTrade: SmartTradeService = yield useSmartTrade({
-      buy: {
+      entry: {
         type: entry.type,
+        side: "Buy",
       },
-      sell: {
+      tp: {
         type: tp.type,
+        side: "Sell",
         price: tp.price,
       },
       sl: {
         type: sl.type,
+        side: "Sell",
         stopPrice: sl.stopPrice,
         price: sl.price,
       },

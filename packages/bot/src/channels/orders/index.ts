@@ -1,2 +1,2 @@
 export * from "./orders.channel.js";
-export { OrderEventType } from "./types.js";
+export type { OrderEventType } from "./types.js";
