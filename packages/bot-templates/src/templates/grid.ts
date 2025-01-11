@@ -32,7 +32,9 @@ export function* grid(ctx: TBotContext<GridBotLiteConfig>) {
   yield* gridBot(gridBotCtx);
 }
 
-grid.displayName = "Grid Bot Lite";
+grid.displayName = "Grid Bot";
+grid.description =
+  "A grid trading strategy in crypto is a market-neutral approach that works by placing a series of buy and sell orders at predetermined intervals above and below a set price. It capitalizes on market volatility, aiming to profit from price fluctuations rather than predicting market direction.";
 grid.hidden = true;
 grid.schema = z.object({
   highPrice: z.number().positive().describe("Highest price of the grid"),
