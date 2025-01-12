@@ -170,6 +170,15 @@ async function runUseDcaEffect(effect: ReturnType<typeof useDca>, ctx: TBotConte
       relativePrice: payload.tpPercent,
       quantity: payload.quantity,
     },
+    sl: payload.slPercent
+      ? {
+          symbol: payload.symbol,
+          type: XOrderType.Market,
+          side: XOrderSide.Sell,
+          relativePrice: -payload.slPercent,
+          quantity: payload.quantity,
+        }
+      : undefined,
     safetyOrders: payload.safetyOrders.map((order) => ({
       relativePrice: order.relativePrice,
       quantity: order.quantity,

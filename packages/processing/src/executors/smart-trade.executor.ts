@@ -23,7 +23,7 @@ export class SmartTradeExecutor {
       case "ARB":
         return new ArbExecutor(smartTrade);
       case "DCA":
-        return new DcaExecutor(smartTrade);
+        return new DcaExecutor(smartTrade, exchange);
       default:
         throw new Error(`Unknown SmartTrade type: ${smartTrade.type}`);
     }
@@ -47,7 +47,7 @@ export class SmartTradeExecutor {
       case "ARB":
         return new ArbExecutor(smartTrade);
       case "DCA":
-        return new DcaExecutor(smartTrade);
+        return new DcaExecutor(smartTrade, exchange);
       default:
         throw new Error(`Unknown SmartTrade type: ${smartTrade.type}`);
     }

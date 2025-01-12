@@ -15,6 +15,11 @@ export const ZDcaBotSettings = z.object({
   tp: z.object({
     percent: z.number().positive().describe("Take Profit from entry order price in %"),
   }),
+  sl: z
+    .object({
+      percent: z.number().positive().describe("Stop Loss drop from entry order price in %"),
+    })
+    .optional(),
   safetyOrders: z.array(
     z.object({
       quantity: z.number().positive().positive("Quantity of the Safety Order in base currency"),

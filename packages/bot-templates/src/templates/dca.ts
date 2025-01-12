@@ -36,6 +36,7 @@ export function* dca(ctx: TBotContext<DCABotConfig>) {
       price: settings.entry.price,
       quantity: settings.entry.quantity,
       tpPercent: settings.tp.percent / 100,
+      slPercent: settings.sl ? settings.sl.percent / 100 : undefined,
       safetyOrders: settings.safetyOrders.map((so) => ({
         relativePrice: -so.priceDeviation / 100,
         quantity: so.quantity,
@@ -64,6 +65,11 @@ dca.schema = z.object({
   tp: z.object({
     percent: z.number().positive().describe("Take Profit from entry order price in %"),
   }),
+  sl: z
+    .object({
+      percent: z.number().positive().describe("Stop Loss drop from entry order price in %"),
+    })
+    .optional(),
   safetyOrders: z.array(
     z.object({
       quantity: z.number().positive().positive("Quantity of the Safety Order in base currency"),

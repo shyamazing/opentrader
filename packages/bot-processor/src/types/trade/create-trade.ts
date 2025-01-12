@@ -34,6 +34,7 @@ export type CreateDcaTrade = {
   type: typeof XSmartTradeType.DCA;
   entry: CreateOrder;
   tp: CreateOrder;
+  sl?: CreateOrder;
   safetyOrders: CreateOrder[];
 };
 
