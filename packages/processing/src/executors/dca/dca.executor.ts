@@ -257,8 +257,10 @@ export class DcaExecutor implements ISmartTradeExecutor {
         `[DcaExecutor] New take profit price is ${newTakeProfitPrice} (+${takeProfitOrder.relativePrice! * 100}%)`,
       );
 
-      // Difference in price may also be used a marker that TP order was modified
-      if (totalQty > takeProfitOrder.quantity) {
+      // Ignore insignificant difference when comparing, e.g., 0.30000000000000003 > 0.3 (@todo add a test)
+      const quantityChanged = Math.abs(totalQty - takeProfitOrder.quantity) > 1e-8;
+      // Difference in price may also be used a marker that TP should be updated
+      if (quantityChanged) {
         logger.info(`[DcaExecutor] One of Safety Orders was filled. Updating TP order...`);
         logger.info(`  Price: ${takeProfitOrder.price} -> ${newTakeProfitPrice}`);
         logger.info(`  Qty: ${takeProfitOrder.quantity} -> ${totalQty}`);
