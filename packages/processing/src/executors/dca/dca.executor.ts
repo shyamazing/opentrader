@@ -253,7 +253,7 @@ export class DcaExecutor implements ISmartTradeExecutor {
       const entryPrice = totalCost / totalQty;
 
       const newTakeProfitPrice = entryPrice + entryPrice * takeProfitOrder.relativePrice!;
-      logger.info(
+      logger.debug(
         `[DcaExecutor] New take profit price is ${newTakeProfitPrice} (+${takeProfitOrder.relativePrice! * 100}%)`,
       );
 
