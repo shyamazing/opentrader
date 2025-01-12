@@ -21,7 +21,7 @@ export interface BotTemplate<T extends IBotConfiguration> {
    */
   displayName?: string;
   /**
-   * Strategy description. What does strategy do?
+   * Strategy description. What does the strategy do?
    */
   description?: string;
   /**
