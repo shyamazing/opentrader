@@ -12,9 +12,9 @@ type Options = {
 };
 
 type StrategyName = keyof typeof templates | string;
-type StrategyInfo = { schema: JsonSchema7Type; isCustom: boolean } & Pick<
+type StrategyInfo = { name: string; schema: JsonSchema7Type; isCustom: boolean } & Pick<
   BotTemplate<any>,
-  "displayName" | "hidden" | "runPolicy" | "watchers" | "requiredHistory"
+  "displayName" | "description" | "hidden" | "runPolicy" | "watchers" | "requiredHistory"
 >;
 
 // Helper function to check if the schema is a ZodObject
@@ -37,9 +37,11 @@ export async function getStrategies({ ctx }: Options) {
     const zodSchema = isZodObject(strategy.schema) ? strategy.schema : z.object({});
 
     result[strategyName] = {
+      name: strategyName,
       schema: zodToJsonSchema(zodSchema),
       isCustom: strategyName in customStrategies,
       displayName: strategy.displayName,
+      description: strategy.description,
       hidden: !!strategy.hidden,
       runPolicy: strategy.runPolicy,
       watchers: strategy.watchers,

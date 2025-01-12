@@ -62,7 +62,7 @@ export function* gridBot(ctx: TBotContext<GridBotConfig>) {
   }
 }
 
-gridBot.displayName = "Grid Bot";
+gridBot.displayName = "Grid Bot Advanced";
 gridBot.hidden = true;
 gridBot.schema = z.object({
   gridLines: z.array(

@@ -21,6 +21,10 @@ export interface BotTemplate<T extends IBotConfiguration> {
    */
   displayName?: string;
   /**
+   * Strategy description. What does the strategy do?
+   */
+  description?: string;
+  /**
    * Number of candles the strategy requires for warm-up.
    * When the bot starts, it will download the required number of candles.
    */

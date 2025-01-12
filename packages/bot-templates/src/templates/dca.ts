@@ -51,6 +51,8 @@ export function* dca(ctx: TBotContext<DCABotConfig>) {
 }
 
 dca.displayName = "DCA Bot";
+dca.description =
+  "Dollar-Cost Averaging (DCA) is a trading strategy that involves entering a position through multiple smaller orders, known as Safety Orders. These orders are placed at predetermined levels, below the initial entry price. This method helps reduce the impact of adverse price movements by lowering the overall cost of the position. Once the market reverses and the price reaches a favorable level, the position is closed at the Take Profit level. This strategy is especially effective in volatile markets, allowing traders to capitalize on price fluctuations while minimizing the risks of poor timing with a single large entry.";
 dca.hidden = true;
 dca.schema = z.object({
   entry: z.object({
