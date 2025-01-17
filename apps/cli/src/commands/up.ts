@@ -11,17 +11,11 @@ export function addUpCommand(program: Command) {
   const settings = getSettings();
 
   program.command("up")
-    .addOption(new Option("-d, --detach", "Run in detached mode").default(settings.detach))
+    .addOption(new Option("-d, --detach", "Run in detached mode").default(false))
     .addOption(new Option("-p, --port <port>", "Customize port server should attach to").default(settings.port))
-    .addOption(new Option("-D, --domain <domain>", "Customize domain server should attach to").default(settings.domain))
+    .addOption(new Option("-h, --host <host>", "Customize domain server should attach to").default(settings.host))
     .helpOption("-h, --help", "Display help for command")
     .action((options) => {
-      const newSettings = {
-        detach: options.detach,
-        port: options.port,
-        domain: options.domain
-      };
-      writeFileSync(settingsPath, JSON.stringify(newSettings, null, 2));
       handle(up)(options);
     });
 }

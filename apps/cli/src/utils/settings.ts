@@ -2,9 +2,8 @@ import { settingsPath } from "./app-path.js";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 
 const defaultSettings = {
-    detach: false,
     port: 8000,
-    domain: "localhost"
+    host: "localhost"
 };
 
 export const getSettings = () => {

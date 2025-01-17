@@ -4,6 +4,7 @@ import { logger } from "@opentrader/logger";
 import type { CommandResult } from "../../types.js";
 import { getPid, savePid } from "../../utils/pid.js";
 import { fileURLToPath } from "node:url";
+import { settingsPath } from "src/utils/app-path.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,7 +19,7 @@ function getAbsoluteStrategiesPath(strategiesPath: string) {
 type Options = {
   detach: boolean;
   port: number;
-  domain: string;
+  host: string;
 };
 
 export async function up(options: Options): Promise<CommandResult> {
@@ -32,16 +33,21 @@ export async function up(options: Options): Promise<CommandResult> {
     };
   }
 
+  const newSettings = {
+    detach: options.detach,
+    port: options.port,
+    domain: options.host,
+  };
+  writeFileSync(settingsPath, JSON.stringify(newSettings, null, 2));
+
   const daemonProcess = isDevelopment
     ? spawn("ts-node", [join(__dirname, "daemon.ts")], {
         detached: options.detach,
         stdio: options.detach ? "ignore" : undefined,
-        env: { ...process.env, PORT: options.port.toString(), DOMAIN: options.domain },
       })
     : spawn("node", [join(__dirname, "daemon.mjs")], {
         detached: options.detach,
         stdio: options.detach ? "ignore" : undefined,
-        env: { ...process.env, PORT: options.port.toString(), DOMAIN: options.domain },
       });
 
   if (daemonProcess.pid === undefined) {
@@ -63,3 +69,7 @@ export async function up(options: Options): Promise<CommandResult> {
     result: undefined,
   };
 }
+function writeFileSync(settingsPath: string, arg1: string) {
+  throw new Error("Function not implemented.");
+}
+
