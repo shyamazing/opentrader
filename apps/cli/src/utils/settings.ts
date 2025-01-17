@@ -9,7 +9,12 @@ const defaultSettings = {
 
 export const getSettings = () => {
     if (existsSync(settingsPath)) {
-        return JSON.parse(readFileSync(settingsPath, "utf-8"));
+        try {
+            return JSON.parse(readFileSync(settingsPath, "utf-8"));
+        } catch (error) {
+            console.warn("Error parsing settings file:", error);
+            return defaultSettings;
+        }
     } else {
         writeFileSync(settingsPath, JSON.stringify(defaultSettings, null, 2));
         return defaultSettings;
