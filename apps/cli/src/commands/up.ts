@@ -14,7 +14,7 @@ export function addUpCommand(program: Command) {
     .addOption(new Option("-d, --detach", "Run in detached mode").default(false))
     .addOption(new Option("-p, --port <port>", "Customize port server should attach to").default(settings.port))
     .addOption(new Option("-h, --host <host>", "Customize domain server should attach to").default(settings.host))
-    .helpOption("-h, --help", "Display help for command")
+    .helpOption("-H, --help", "Display help for command")
     .action((options) => {
       handle(up)(options);
     });
