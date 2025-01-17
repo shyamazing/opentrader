@@ -5,9 +5,9 @@ import type { CommandResult } from "../types.js";
 import { readBotConfig, readExchangesConfig } from "../config.js";
 import { createDaemonRpcClient } from "../daemon-rpc.js";
 
-const daemonRpc = createDaemonRpcClient();
 
 export async function stopCommand(options: { config: string }): Promise<CommandResult> {
+  const daemonRpc = createDaemonRpcClient();
   const config = readBotConfig(options.config);
   logger.debug(config, "Parsed bot config");
 

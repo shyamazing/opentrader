@@ -26,9 +26,9 @@ type Options = {
   paper: boolean;
 };
 
-const daemonRpc = createDaemonRpcClient();
 
 export async function addExchangeAccount(options: Options): Promise<CommandResult> {
+  const daemonRpc = createDaemonRpcClient();
   await daemonRpc.exchangeAccount.create.mutate({
     name: options.name || options.label,
     label: options.label,
