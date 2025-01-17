@@ -52,7 +52,7 @@ export async function runTrading(strategyName: string, options: Options): Promis
     },
   });
 
-  const isDaemonRunning = await checkDaemonHealth();
+  const isDaemonRunning = await checkDaemonHealth(daemonRpc);
   if (!isDaemonRunning) {
     logger.info("Daemon is not running. Please start it before running the bot");
 
@@ -90,7 +90,7 @@ export async function runTrading(strategyName: string, options: Options): Promis
   };
 }
 
-async function checkDaemonHealth() {
+async function checkDaemonHealth(daemonRpc: ReturnType<typeof createDaemonRpcClient>) {
   try {
     await daemonRpc.public.healhcheck.query();
 
