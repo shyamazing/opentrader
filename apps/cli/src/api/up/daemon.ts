@@ -1,14 +1,13 @@
 import { Daemon } from "@opentrader/daemon";
 import { getSettings } from "../../utils/settings.js";
 
-const settings = getSettings();
-const { host, port } = settings;
+const { host, port } = getSettings();
 
 const daemon = await Daemon.create({
   server: {
     frontendDistPath: "../frontend",
-    port,
     host,
+    port,
   },
 });
 
