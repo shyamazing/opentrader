@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { logger } from "@opentrader/logger";
 import { settingsPath } from "./app-path.js";
 
