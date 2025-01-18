@@ -5,6 +5,7 @@ import type { CommandResult } from "../../types.js";
 import { getPid, savePid } from "../../utils/pid.js";
 import { fileURLToPath } from "node:url";
 import { settingsPath } from "src/utils/app-path.js";
+import { writeFileSync } from "node:fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -34,7 +35,6 @@ export async function up(options: Options): Promise<CommandResult> {
   }
 
   const newSettings = {
-    detach: options.detach,
     port: options.port,
     domain: options.host,
   };
@@ -68,8 +68,5 @@ export async function up(options: Options): Promise<CommandResult> {
   return {
     result: undefined,
   };
-}
-function writeFileSync(settingsPath: string, arg1: string) {
-  throw new Error("Function not implemented.");
 }
 
