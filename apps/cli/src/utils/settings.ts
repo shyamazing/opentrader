@@ -23,7 +23,7 @@ export function getSettings(): DaemonSettings {
     try {
       return JSON.parse(readFileSync(settingsPath, "utf-8"));
     } catch (error) {
-      logger.warn("Error parsing settings file:", error);
+      logger.warn(error, "Failed to parse settings.json.");
       return defaultSettings;
     }
   } else {
