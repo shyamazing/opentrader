@@ -4,11 +4,9 @@ import { appRouter } from "@opentrader/trpc";
 
 import { getSettings } from "./utils/settings.js";
 
-
 export const createDaemonRpcClient = () => {
-  const settings = getSettings();
-  
-  const { host, port } = settings;
+  const { host, port } = getSettings();
+
   const DAEMON_URL = `http://${host}:${port}/api/trpc`;
 
   return createTRPCProxyClient<typeof appRouter>({
