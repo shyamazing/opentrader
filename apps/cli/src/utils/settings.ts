@@ -1,5 +1,6 @@
-import { settingsPath } from "./app-path.js";
 import { readFileSync, writeFileSync, existsSync } from "fs";
+import { logger } from "@opentrader/logger";
+import { settingsPath } from "./app-path.js";
 
 type DaemonSettings = {
   host: string;
@@ -16,7 +17,7 @@ export function getSettings(): DaemonSettings {
     try {
       return JSON.parse(readFileSync(settingsPath, "utf-8"));
     } catch (error) {
-      console.warn("Error parsing settings file:", error);
+      logger.warn("Error parsing settings file:", error);
       return defaultSettings;
     }
   } else {
