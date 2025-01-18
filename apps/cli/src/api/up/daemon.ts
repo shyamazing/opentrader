@@ -7,8 +7,8 @@ const { host, port } = settings;
 const daemon = await Daemon.create({
   server: {
     frontendDistPath: "../frontend",
-    port: port,
-    host: host,
+    port,
+    host,
   },
 });
 
