@@ -7,7 +7,7 @@ export function addUpCommand(program: Command) {
   program
     .command("up")
     .addOption(new Option("-d, --detach", "Run in detached mode").default(false))
-    .addOption(new Option("--host <host>", "Customize domain server should attach to").default(defaultSettings.host))
-    .addOption(new Option("-p, --port <port>", "Customize port server should attach to").default(defaultSettings.port))
+    .addOption(new Option("--host <host>", "Custom daemon host. Default to `localhost`").default(defaultSettings.host))
+    .addOption(new Option("-p, --port <port>", "Custom daemon port. Default to `8000`").default(defaultSettings.port))
     .action(handle(up));
 }

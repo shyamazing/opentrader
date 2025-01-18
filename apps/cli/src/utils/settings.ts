@@ -8,7 +8,13 @@ type DaemonSettings = {
 };
 
 export const defaultSettings: DaemonSettings = {
-  host: "127.0.0.1",
+  /**
+   * Daemon hostname. Use `0.0.0.0` to listen on all interfaces
+   */
+  host: "localhost",
+  /**
+   * Daemon port.
+   */
   port: 8000,
 };
 
