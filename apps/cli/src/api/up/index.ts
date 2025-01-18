@@ -1,11 +1,11 @@
 import { dirname, join } from "node:path";
+import { writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { logger } from "@opentrader/logger";
 import type { CommandResult } from "../../types.js";
 import { getPid, savePid } from "../../utils/pid.js";
-import { fileURLToPath } from "node:url";
 import { settingsPath } from "src/utils/app-path.js";
-import { writeFileSync } from "node:fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -69,4 +69,3 @@ export async function up(options: Options): Promise<CommandResult> {
     result: undefined,
   };
 }
-
