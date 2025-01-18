@@ -27,9 +27,9 @@ type Options = {
   paper: boolean;
 };
 
-const daemonRpc = createDaemonRpcClient();
 
 export async function updateExchangeAccount(options: Options): Promise<CommandResult> {
+  const daemonRpc = createDaemonRpcClient();
   const exchangeAccounts = await daemonRpc.exchangeAccount.list.query();
   const exchangeAccount = exchangeAccounts.find((account) => account.label === options.label);
 

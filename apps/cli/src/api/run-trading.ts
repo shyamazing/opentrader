@@ -15,9 +15,9 @@ type Options = {
   timeframe?: BarSize;
 };
 
-const daemonRpc = createDaemonRpcClient();
 
 export async function runTrading(strategyName: string, options: Options): Promise<CommandResult> {
+  const daemonRpc = createDaemonRpcClient();
   const config = readBotConfig(options.config);
   logger.debug(config, "Parsed bot config");
 
@@ -52,7 +52,7 @@ export async function runTrading(strategyName: string, options: Options): Promis
     },
   });
 
-  const isDaemonRunning = await checkDaemonHealth();
+  const isDaemonRunning = await checkDaemonHealth(daemonRpc);
   if (!isDaemonRunning) {
     logger.info("Daemon is not running. Please start it before running the bot");
 
@@ -90,7 +90,7 @@ export async function runTrading(strategyName: string, options: Options): Promis
   };
 }
 
-async function checkDaemonHealth() {
+async function checkDaemonHealth(daemonRpc: ReturnType<typeof createDaemonRpcClient>) {
   try {
     await daemonRpc.public.healhcheck.query();
 

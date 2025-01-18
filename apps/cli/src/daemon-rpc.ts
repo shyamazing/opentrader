@@ -2,9 +2,13 @@ import superjson from "superjson";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { appRouter } from "@opentrader/trpc";
 
-const DAEMON_URL = "http://localhost:8000/api/trpc";
+import { getSettings } from "./utils/settings.js";
 
 export const createDaemonRpcClient = () => {
+  const { host, port } = getSettings();
+
+  const DAEMON_URL = `http://${host}:${port}/api/trpc`;
+
   return createTRPCProxyClient<typeof appRouter>({
     transformer: superjson,
     links: [

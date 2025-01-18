@@ -1,9 +1,10 @@
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { logger } from "@opentrader/logger";
 import type { CommandResult } from "../../types.js";
 import { getPid, savePid } from "../../utils/pid.js";
-import { fileURLToPath } from "node:url";
+import { saveSettings } from "../../utils/settings.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,6 +18,8 @@ function getAbsoluteStrategiesPath(strategiesPath: string) {
 
 type Options = {
   detach: boolean;
+  port: number;
+  host: string;
 };
 
 export async function up(options: Options): Promise<CommandResult> {
@@ -29,6 +32,9 @@ export async function up(options: Options): Promise<CommandResult> {
       result: undefined,
     };
   }
+
+  // Save settings before starting the daemon
+  saveSettings({ host: options.host, port: options.port });
 
   const daemonProcess = isDevelopment
     ? spawn("ts-node", [join(__dirname, "daemon.ts")], {
@@ -54,9 +60,6 @@ export async function up(options: Options): Promise<CommandResult> {
     daemonProcess.stdout?.pipe(process.stdout);
     daemonProcess.stderr?.pipe(process.stderr);
   }
-
-  // console.log("Main process PID:", process.pid);
-  // console.log("Daemon process PID:", daemonProcess.pid);
 
   return {
     result: undefined,
