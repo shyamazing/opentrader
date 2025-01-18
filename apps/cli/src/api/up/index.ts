@@ -33,9 +33,6 @@ export async function up(options: Options): Promise<CommandResult> {
     };
   }
 
-  const { host, port } = options;
-  saveSettings({ host, port });
-
   const daemonProcess = isDevelopment
     ? spawn("ts-node", [join(__dirname, "daemon.ts")], {
         detached: options.detach,
@@ -60,6 +57,8 @@ export async function up(options: Options): Promise<CommandResult> {
     daemonProcess.stdout?.pipe(process.stdout);
     daemonProcess.stderr?.pipe(process.stderr);
   }
+
+  saveSettings({ host: options.host, port: options.port });
 
   return {
     result: undefined,
