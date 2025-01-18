@@ -21,7 +21,12 @@ export function getSettings(): DaemonSettings {
       return defaultSettings;
     }
   } else {
-    writeFileSync(settingsPath, JSON.stringify(defaultSettings, null, 2));
-    return defaultSettings;
+    return saveSettings(defaultSettings);
   }
+}
+
+export function saveSettings(settings: DaemonSettings): DaemonSettings {
+  writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+
+  return defaultSettings;
 }

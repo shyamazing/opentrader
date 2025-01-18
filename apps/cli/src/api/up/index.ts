@@ -1,11 +1,10 @@
 import { dirname, join } from "node:path";
-import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { logger } from "@opentrader/logger";
 import type { CommandResult } from "../../types.js";
 import { getPid, savePid } from "../../utils/pid.js";
-import { settingsPath } from "src/utils/app-path.js";
+import { saveSettings } from "../../utils/settings.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -34,11 +33,8 @@ export async function up(options: Options): Promise<CommandResult> {
     };
   }
 
-  const newSettings = {
-    port: options.port,
-    domain: options.host,
-  };
-  writeFileSync(settingsPath, JSON.stringify(newSettings, null, 2));
+  const { host, port } = options;
+  saveSettings({ host, port });
 
   const daemonProcess = isDevelopment
     ? spawn("ts-node", [join(__dirname, "daemon.ts")], {
