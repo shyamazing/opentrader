@@ -49,7 +49,7 @@ export class Daemon {
     await server.listen();
 
     logger.info(`RPC Server listening on port ${params.server.port}`);
-    logger.info(`OpenTrader UI: http://${params.server.domain}:${params.server.port}`);
+    logger.info(`OpenTrader UI: http://${params.server.host}:${params.server.port}`);
 
     return new Daemon(platform, server);
   }

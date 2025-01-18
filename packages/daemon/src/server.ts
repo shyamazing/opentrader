@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
 export type CreateServerOptions = {
   frontendDistPath: string;
   port: number;
-  domain: string;
+  host: string;
 };
 
 /**
@@ -50,7 +50,7 @@ export const createServer = (params: CreateServerOptions) => {
     app: fastify,
     server: fastify.server,
     listen: async () => {
-      await fastify.listen({ port: params.port, host: params.domain }); // Change to 0.0.0.0 to always listen on all interfaces
+      await fastify.listen({ port: params.port, host: params.host }); // Change to 0.0.0.0 to always listen on all interfaces
     },
     close: async () => {
       await fastify.close();
