@@ -1,129 +1,75 @@
-import { eventBus } from "@opentrader/event-bus";
+import { xprisma } from "@opentrader/db";
 import { logger } from "@opentrader/logger";
-import { findStrategy } from "@opentrader/bot-templates/server";
-import { BotProcessing, getWatchers, shouldRunStrategy } from "@opentrader/processing";
-import { MarketEvent, MarketId } from "@opentrader/types";
-import { TBotWithExchangeAccount, xprisma } from "@opentrader/db";
-
-import { processingQueue } from "./queue/index.js";
+import { Bot } from "./bot.js";
 import { MarketsStream } from "./streams/markets.stream.js";
-import { OrderEvent, OrdersStream } from "./streams/orders.stream.js";
+import { OrdersStream } from "./streams/orders.stream.js";
 
-export class Bot {
+export class BotManager {
+  bots: Bot[] = [];
+
   constructor(
-    public bot: TBotWithExchangeAccount,
-    private marketsStream: MarketsStream,
     private ordersStream: OrdersStream,
+    private marketsStream: MarketsStream,
   ) {}
 
-  async start() {
-    await eventBus.emit("onBeforeBotStarted", this.bot);
-
-    // 1. Exec "start" on the strategy fn
-    const botProcessor = new BotProcessing(this.bot);
-    await botProcessor.processStartCommand();
-
-    this.bot = await xprisma.bot.custom.update({
-      where: { id: this.bot.id },
-      data: { enabled: true },
-      include: { exchangeAccount: true },
-    });
-
-    // 2. Place pending trades
-    const pendingSmartTrades = await botProcessor.getPendingSmartTrades();
-    for (const trade of pendingSmartTrades) {
-      await eventBus.emit("onTradeCreated", trade);
+  async start(id: number) {
+    if (this.bots.some((bot) => bot.bot.id === id)) {
+      throw new Error(`Bot with id ${id} is already running`);
     }
 
-    // 3. Subscribe to Market and Order events
-    await this.watchStreams();
-
-    await eventBus.emit("onBotStarted", this.bot);
-  }
-
-  async stop() {
-    await eventBus.emit("onBeforeBotStopped", this.bot);
-
-    // 1. Unsubscribe from Market and Order events
-    this.unwatchStreams();
-
-    // 2. Exec "stop" on the strategy fn
-    const botProcessor = new BotProcessing(this.bot);
-    await botProcessor.processStopCommand();
-
-    this.bot = await xprisma.bot.custom.update({
-      where: { id: this.bot.id },
-      data: { enabled: false },
+    const data = await xprisma.bot.custom.findUniqueOrThrow({
+      where: { id },
       include: { exchangeAccount: true },
     });
 
-    await eventBus.emit("onBotStopped", this.bot);
+    const bot = new Bot(data, this.ordersStream, this.marketsStream);
+
+    try {
+      await bot.start();
+      this.bots.push(bot);
+    } catch (err) {
+      logger.warn(
+        `An error occurred while starting the bot [id=${bot.bot.id} name=${bot.bot.name}]. Error: ${err}. Stopping...`,
+      );
+      await bot.stop();
+      logger.info(`Bot [id=${bot.bot.id} name=${bot.bot.name}] has been stopped`);
+
+      throw err; // broadcast the error to tRPC
+    }
   }
 
-  async watchStreams() {
-    await this.marketsStream.add(this.bot);
-    this.marketsStream.on("market", this.handleMarketEvent);
-    this.ordersStream.on("order", this.handleOrderEvent);
-  }
+  async stop(id: number) {
+    const bot = this.bots.find((bot) => bot.bot.id === id);
 
-  unwatchStreams() {
-    this.marketsStream.off("market", this.handleMarketEvent);
-    this.ordersStream.off("order", this.handleOrderEvent);
-  }
-
-  handleMarketEvent = (event: MarketEvent) => {
-    const { strategyFn } = findStrategy(this.bot.template);
-    const { watchOrderbook, watchCandles, watchTrades, watchTicker } = getWatchers(strategyFn, this.bot);
-
-    const isWatchingOrderbook = event.type === "onOrderbookChange" && watchOrderbook.includes(event.marketId);
-    const isWatchingTicker = event.type === "onTickerChange" && watchTicker.includes(event.marketId);
-    const isWatchingTrades = event.type === "onPublicTrade" && watchTrades.includes(event.marketId);
-    const isWatchingCandles = event.type === "onCandleClosed" && watchCandles.includes(event.marketId);
-    const isWatchingAny = isWatchingOrderbook || isWatchingTicker || isWatchingTrades || isWatchingCandles;
-
-    const subscribedMarkets = [
-      ...new Set([...watchOrderbook, ...watchCandles, ...watchTrades, ...watchTicker]),
-    ] as MarketId[];
-
-    if (isWatchingAny && shouldRunStrategy(strategyFn, this.bot, event.type)) {
-      processingQueue.push({
-        ...event,
-        bot: this.bot,
-        subscribedMarkets,
+    if (!bot) {
+      logger.warn(`Looks like the bot with id ${id} has an invalid state. Performing cleanup...`);
+      const data = await xprisma.bot.custom.findUniqueOrThrow({
+        where: { id },
+        include: { exchangeAccount: true },
       });
-    }
-  };
+      const bot = new Bot(data, this.ordersStream, this.marketsStream);
+      await bot.stop();
 
-  handleOrderEvent = (event: OrderEvent) => {
-    const { order, exchangeCode } = event;
-
-    if (order.smartTrade.botId !== this.bot.id) {
-      logger.debug("handleOrderEvent: Order does not belong to this bot. Ignoring");
       return;
     }
 
-    if (event.type === "onFilled") {
-      if (!this.bot.enabled) {
-        logger.error("handleOrderEvent: Cannot handle order event when the bot is disabled");
-        return;
-      }
+    await bot.stop();
+    this.bots = this.bots.filter((b) => b.bot.id !== id);
+  }
 
-      const marketId = `${exchangeCode}:${order.smartTrade.symbol}` as MarketId;
-      const { strategyFn } = findStrategy(this.bot.template);
-      const { watchOrderbook, watchCandles, watchTrades, watchTicker } = getWatchers(strategyFn, this.bot);
-      const subscribedMarkets = [
-        ...new Set([...watchOrderbook, ...watchCandles, ...watchTrades, ...watchTicker]),
-      ] as MarketId[];
+  /**
+   * Stop all bots gracefully.
+   * Does execute "stop" command on each bot, and then sets the bot status as disabled.
+   */
+  async stopAll() {
+    if (this.bots.length === 0) return;
 
-      if (shouldRunStrategy(strategyFn, this.bot, "onOrderFilled")) {
-        processingQueue.push({
-          type: "onOrderFilled",
-          marketId,
-          bot: this.bot,
-          orderId: order.id,
-          subscribedMarkets,
-        });
-      }
+    logger.info(`Stopping ${this.bots.length} bots gracefully…`);
+    for (const bot of this.bots) {
+      await bot.stop();
+      logger.info(`Bot stopped [id=${bot.bot.id} name=${bot.bot.name}]`);
     }
-  };
+
+    this.bots = [];
+  }
 }

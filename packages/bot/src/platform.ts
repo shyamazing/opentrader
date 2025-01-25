@@ -12,18 +12,17 @@ import { eventBus } from "@opentrader/event-bus";
 import { store } from "@opentrader/bot-store";
 import { MarketEvent } from "@opentrader/types";
 import { EventEmitter } from "node:events";
-import { Bot } from "./bot.manager.js";
-
 import { MarketsStream } from "./streams/markets.stream.js";
 import { OrderEvent, OrdersStream } from "./streams/orders.stream.js";
+import { BotManager } from "./bot.manager.js";
 import { TradeManager } from "./trade.manager.js";
 
 export class Platform {
   private ordersStream: OrdersStream;
   private marketStream: MarketsStream;
   private unsubscribeFromEventBus = () => {};
-  private enabledBots: Bot[] = [];
-  private trades: TradeManager[] = [];
+  private botManager: BotManager;
+  private tradeManager: TradeManager;
 
   constructor(exchangeAccounts: ExchangeAccountWithCredentials[]) {
     EventEmitter.defaultMaxListeners = 0; // Disable Node.js max listeners warning
@@ -31,8 +30,11 @@ export class Platform {
     this.ordersStream = new OrdersStream(exchangeAccounts);
     this.ordersStream.on("order", this.handleOrderEvent);
 
-    this.marketStream = new MarketsStream(this.enabledBots.map(({ bot }) => bot));
+    this.marketStream = new MarketsStream([]);
     this.marketStream.on("market", this.handleMarketEvent);
+
+    this.botManager = new BotManager(this.ordersStream, this.marketStream);
+    this.tradeManager = new TradeManager(this.ordersStream);
   }
 
   async bootstrap() {
@@ -47,10 +49,10 @@ export class Platform {
   }
 
   async shutdown() {
-    await this.stopEnabledBots();
+    await this.botManager.stopAll();
+    this.tradeManager.destroy();
 
     await this.ordersStream.destroy();
-
     this.marketStream.off("market", this.handleMarketEvent);
     this.marketStream.destroy();
 
@@ -148,38 +150,24 @@ export class Platform {
       //
     };
 
-    const startBot = async (data: TBotWithExchangeAccount) => {
-      const bot = new Bot(data, this.marketStream, this.ordersStream);
-      await bot.start();
-      this.enabledBots.push(bot);
+    const startBot = async (bot: TBotWithExchangeAccount) => {
+      await this.botManager.start(bot.id);
     };
 
     const onBotStarted = async (_data: TBotWithExchangeAccount) => {
       //
     };
 
-    const stopBot = async (data: TBotWithExchangeAccount) => {
-      const bot = this.enabledBots.find(({ bot }) => bot.id === data.id);
-
-      if (bot) {
-        const botTrades = this.trades.filter((trade) => trade.smartTrade.botId === bot.bot.id);
-        for (const trade of botTrades) {
-          trade.unwatchStreams();
-        }
-        this.trades = this.trades.filter(({ smartTrade }) => smartTrade.botId !== bot.bot.id);
-
-        await bot.stop();
-        this.enabledBots = this.enabledBots.filter((enabledBot) => enabledBot !== bot);
-      }
+    const stopBot = async (bot: TBotWithExchangeAccount) => {
+      await this.botManager.stop(bot.id);
     };
 
     const onBeforeBotStopped = async (_data: TBotWithExchangeAccount) => {
       //
     };
 
-    const onBotStopped = async (data: TBotWithExchangeAccount) => {
-      this.enabledBots = this.enabledBots.filter(({ bot }) => bot.id !== data.id);
-      await this.marketStream.clean(this.enabledBots.map(({ bot }) => bot));
+    const onBotStopped = async (_bot: TBotWithExchangeAccount) => {
+      //
     };
 
     const addExchangeAccount = async (exchangeAccount: ExchangeAccountWithCredentials) =>
@@ -196,17 +184,11 @@ export class Platform {
     };
 
     const onTradeCreated = async (trade: SmartTradeWithOrders) => {
-      let tradeManager = this.trades.find(({ smartTrade }) => smartTrade.id === trade.id);
-      if (!tradeManager) {
-        tradeManager = new TradeManager(trade, this.ordersStream);
-        this.trades.push(tradeManager);
-      }
-
-      await tradeManager.next();
+      //
     };
 
     const onTradeCompleted = async (trade: SmartTradeWithOrders) => {
-      this.trades = this.trades.filter(({ smartTrade }) => smartTrade.id !== trade.id);
+      //
     };
 
     eventBus.on("startBot", startBot);

@@ -35,6 +35,7 @@ export const eventBus = new Emittery<{
   onBotStopped: TBotWithExchangeAccount;
 
   // Trade events
+  placeTrade: SmartTradeWithOrders;
   cancelTrade: SmartTradeWithOrders;
   onTradeCreated: SmartTradeWithOrders;
   onTradeUpdated: SmartTradeWithOrders;
