@@ -19,6 +19,7 @@ export type StrategyAction = (typeof StrategyAction)[keyof typeof StrategyAction
  */
 export const MarketEventType = {
   onOrderFilled: "onOrderFilled",
+  onTradeCompleted: "onTradeCompleted",
   onCandleClosed: "onCandleClosed",
   onPublicTrade: "onPublicTrade",
   onOrderbookChange: "onOrderbookChange",

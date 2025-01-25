@@ -1,4 +1,3 @@
-import { BotProcessing } from "@opentrader/processing";
 import { eventBus } from "@opentrader/event-bus";
 import { BotService } from "../../../../services/bot.service.js";
 import type { Context } from "../../../../utils/context.js";
@@ -18,12 +17,7 @@ export async function stopGridBot({ input }: Options) {
   botService.assertIsNotAlreadyStopped();
   botService.assertIsNotProcessing();
 
-  const botProcessor = new BotProcessing(botService.bot);
-  await botProcessor.processStopCommand();
-
-  await botService.stop();
-
-  eventBus.botStopped(botService.bot);
+  await eventBus.emit("stopBot", botService.bot);
 
   return {
     ok: true,

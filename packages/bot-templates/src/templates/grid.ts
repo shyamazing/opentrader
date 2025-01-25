@@ -43,7 +43,7 @@ grid.schema = z.object({
   quantityPerGrid: z.number().positive().describe("Quantity of base currency per each grid"),
 });
 grid.runPolicy = {
-  onOrderFilled: true,
+  onTradeCompleted: true,
 };
 
 export type GridBotLiteConfig = IBotConfiguration<z.infer<typeof grid.schema>>;

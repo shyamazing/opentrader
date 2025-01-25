@@ -1,5 +1,5 @@
 import type { IGridBotLevel, IGridLine } from "@opentrader/types";
-import { OrderStatusEnum } from "@opentrader/types";
+import { XOrderStatus } from "@opentrader/types";
 
 import { isWaitingGridLine } from "./isWaitingGridLine.js";
 import { nextGridLinePrice } from "./nextGridLinePrice.js";
@@ -31,12 +31,12 @@ export function computeGridLevelsFromCurrentAssetPrice(
         buy: {
           price: gridLine.price,
           quantity: gridLine.quantity,
-          status: OrderStatusEnum.Filled,
+          status: XOrderStatus.Filled,
         },
         sell: {
           price: sellOrderPrice,
           quantity: gridLine.quantity,
-          status: OrderStatusEnum.Idle,
+          status: XOrderStatus.Idle,
         },
       };
 
@@ -48,12 +48,12 @@ export function computeGridLevelsFromCurrentAssetPrice(
       buy: {
         price: gridLine.price,
         quantity: gridLine.quantity,
-        status: OrderStatusEnum.Idle,
+        status: XOrderStatus.Idle,
       },
       sell: {
         price: sellOrderPrice,
         quantity: gridLine.quantity,
-        status: OrderStatusEnum.Idle,
+        status: XOrderStatus.Idle,
       },
     };
 

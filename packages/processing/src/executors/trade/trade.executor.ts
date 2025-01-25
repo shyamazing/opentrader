@@ -3,8 +3,8 @@ import type { SmartTradeWithOrders, ExchangeAccountWithCredentials } from "@open
 import type { IExchange } from "@opentrader/exchanges";
 import { exchangeProvider } from "@opentrader/exchanges";
 import { logger } from "@opentrader/logger";
-import { XOrderType } from "@opentrader/types";
-import type { ISmartTradeExecutor } from "../smart-trade-executor.interface.js";
+import { ITicker, XEntityType, XOrderStatus, XOrderType } from "@opentrader/types";
+import type { ISmartTradeExecutor, SmartTradeContext } from "../smart-trade-executor.interface.js";
 import { OrderExecutor } from "../order/order.executor.js";
 
 export class TradeExecutor implements ISmartTradeExecutor {
@@ -82,16 +82,19 @@ export class TradeExecutor implements ISmartTradeExecutor {
    * Places the entry order and take profit order on the exchange.
    * Returns `true` if the order was placed successfully.
    */
-  async next(): Promise<boolean> {
+  async next(market?: SmartTradeContext) {
     const entryOrder = this.smartTrade.orders.find((order) => order.entityType === "EntryOrder")!;
     const takeProfitOrder = this.smartTrade.orders.find((order) => order.entityType === "TakeProfitOrder");
+    const stopLossOrder = this.smartTrade.orders.find((order) => order.entityType === XEntityType.StopLossOrder);
 
     if (entryOrder.status === "Idle") {
       const orderExecutor = new OrderExecutor(entryOrder, this.exchange, this.smartTrade.symbol);
       await orderExecutor.place();
       await this.pull();
 
-      logger.info(`Entry ${entryOrder.type} order placed for ${this.smartTrade.symbol} (qty: ${entryOrder.quantity}, price: ${entryOrder.type === XOrderType.Market ? 'market' : entryOrder.price})`);
+      logger.info(
+        `Entry ${entryOrder.type} order placed for ${this.smartTrade.symbol} (qty: ${entryOrder.quantity}, price: ${entryOrder.type === XOrderType.Market ? "market" : entryOrder.price})`,
+      );
 
       return true;
     } else if (entryOrder.status === "Filled" && takeProfitOrder?.status === "Idle") {
@@ -99,15 +102,47 @@ export class TradeExecutor implements ISmartTradeExecutor {
       await orderExecutor.place();
       await this.pull();
 
-      logger.info(`TP ${takeProfitOrder.type} order placed for ${this.smartTrade.symbol} (qty: ${takeProfitOrder.quantity}, price: ${takeProfitOrder.type === XOrderType.Market ? 'market' : takeProfitOrder.price})`);
+      logger.info(
+        `TP ${takeProfitOrder.type} order placed for ${this.smartTrade.symbol} (qty: ${takeProfitOrder.quantity}, price: ${takeProfitOrder.type === XOrderType.Market ? "market" : takeProfitOrder.price})`,
+      );
 
       return true;
     }
 
-    logger.debug(
-      `Nothing to do: Position { id: ${this.smartTrade.id}, entryOrderStatus: ${entryOrder.status}, takeProfitOrderStatus: ${takeProfitOrder?.status} }`,
-    );
+    const stopLossActivated =
+      market?.ticker && stopLossOrder?.stopPrice ? market.ticker.bid <= stopLossOrder.stopPrice : false;
+    if (
+      entryOrder.status === "Filled" &&
+      takeProfitOrder?.status === "Placed" &&
+      stopLossOrder?.status === "Idle" &&
+      stopLossActivated
+    ) {
+      // Cancel TP
+      const tpOrder = new OrderExecutor(takeProfitOrder, this.exchange, this.smartTrade.symbol);
+      await tpOrder.cancel();
+
+      // Place SL
+      const slOrder = new OrderExecutor(stopLossOrder, this.exchange, this.smartTrade.symbol);
+      await slOrder.place();
+
+      await this.pull();
+
+      logger.info(
+        `SL ${stopLossOrder.type} order placed for ${this.smartTrade.symbol} (qty: ${stopLossOrder.quantity}, price: ${stopLossOrder.type === XOrderType.Market ? "market" : stopLossOrder.price})`,
+      );
+
+      return true;
+    }
+
     return false;
+  }
+
+  async onOrderFilled() {
+    return this.next();
+  }
+
+  async onTicker(ticker: ITicker) {
+    await this.next({ ticker });
   }
 
   /**
@@ -138,6 +173,7 @@ export class TradeExecutor implements ISmartTradeExecutor {
   get status(): "Entering" | "Exiting" | "Finished" {
     const entryOrder = this.smartTrade.orders.find((order) => order.entityType === "EntryOrder")!;
     const takeProfitOrder = this.smartTrade.orders.find((order) => order.entityType === "TakeProfitOrder");
+    const stopLossOrder = this.smartTrade.orders.find((order) => order.entityType === XEntityType.StopLossOrder);
 
     if (entryOrder.status === "Idle" || entryOrder.status === "Placed") {
       return "Entering";
@@ -145,12 +181,12 @@ export class TradeExecutor implements ISmartTradeExecutor {
 
     if (
       entryOrder.status === "Filled" &&
-      (takeProfitOrder?.status === "Idle" || takeProfitOrder?.status === "Placed")
+      (takeProfitOrder?.status === "Filled" || stopLossOrder?.status === "Filled")
     ) {
-      return "Exiting";
+      return "Finished";
     }
 
-    return "Finished";
+    return "Exiting";
   }
 
   /**

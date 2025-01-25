@@ -12,7 +12,7 @@ import { BotStoreAdapter } from "./bot-store-adapter.js";
 type ProcessParams = {
   triggerEventType?: MarketEventType;
   market?: MarketData; // default market
-  markets?: Record<MarketId, MarketData>; // aditional markets
+  markets?: Record<MarketId, MarketData>; // additional markets
 };
 
 export class BotProcessing {
@@ -230,5 +230,20 @@ export class BotProcessing {
       const smartTradeExecutor = SmartTradeExecutor.create(smartTrade, exchangeAccount);
       await smartTradeExecutor.next();
     }
+  }
+
+  async getPendingSmartTrades() {
+    const smartTrades = await xprisma.smartTrade.findMany({
+      where: {
+        ref: { not: null },
+        bot: { id: this.bot.id },
+      },
+      include: {
+        exchangeAccount: true,
+        orders: true,
+      },
+    });
+
+    return smartTrades;
   }
 }

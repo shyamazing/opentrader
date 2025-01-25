@@ -9,11 +9,14 @@ import { updateDcaBot } from "./update-bot/handler.js";
 import { ZUpdateDcaBotInputSchema } from "./update-bot/schema.js";
 import { getFormOptions } from "./get-form-options/handler.js";
 import { ZGetDcaBotFormOptionsInputSchema } from "./get-form-options/schema.js";
+import { getTrades } from "./get-trades/handler.js";
+import { ZGetDcaBotTradesSchema } from "./get-trades/schema.js";
 
 export const dcaBotRouter = router({
   list: authorizedProcedure.query(getDcaBots),
   getOne: authorizedProcedure.input(ZGetDcaBotInputSchema).query(getDcaBot),
   create: authorizedProcedure.input(ZCreateDcaBotInputSchema).mutation(createDcaBot),
   update: authorizedProcedure.input(ZUpdateDcaBotInputSchema).mutation(updateDcaBot),
+  getTrades: authorizedProcedure.input(ZGetDcaBotTradesSchema).query(getTrades),
   formOptions: authorizedProcedure.input(ZGetDcaBotFormOptionsInputSchema).query(getFormOptions),
 });

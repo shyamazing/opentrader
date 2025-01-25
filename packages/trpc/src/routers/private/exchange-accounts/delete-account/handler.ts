@@ -16,7 +16,8 @@ export async function deleteExchangeAccount({ input, ctx }: Options) {
       id: input.id,
     },
   });
-  eventBus.exchangeAccountDeleted(exchangeAccount);
+
+  await eventBus.emit("onExchangeAccountDeleted", exchangeAccount);
 
   return exchangeAccount;
 }

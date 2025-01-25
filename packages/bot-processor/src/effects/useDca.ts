@@ -20,6 +20,10 @@ type UseDcaPayload = {
    */
   tpPercent: number;
   /**
+   * The price drop to trigger the SL (e.g. 0.01 is 10% drop)
+   */
+  slPercent?: number;
+  /**
    * Safety orders to be placed when price goes down
    */
   safetyOrders: SafetyOrder[];

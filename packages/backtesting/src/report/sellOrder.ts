@@ -1,11 +1,11 @@
-import { SmartTradeWithSell } from "@opentrader/bot-processor";
+import { Trade } from '@opentrader/bot-processor';
 import { OrderSideEnum } from "@opentrader/types";
 import type { ActiveOrder } from "../types/index.js";
 
-export function sellOrder(smartTrade: SmartTradeWithSell): ActiveOrder {
+export function sellOrder(smartTrade: Trade): ActiveOrder {
   return {
     side: OrderSideEnum.Sell,
-    quantity: smartTrade.quantity,
-    price: (smartTrade.sell.filledPrice || smartTrade.sell.price)!,
+    quantity: smartTrade.entryOrder.quantity,
+    price: (smartTrade.tpOrder!.filledPrice || smartTrade.tpOrder!.price)!,
   };
 }

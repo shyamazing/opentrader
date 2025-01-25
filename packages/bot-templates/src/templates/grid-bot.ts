@@ -39,13 +39,15 @@ export function* gridBot(ctx: TBotContext<GridBotConfig>) {
   for (const [index, grid] of gridLevels.entries()) {
     const smartTrade: SmartTradeService = yield useSmartTrade(
       {
-        buy: {
+        entry: {
           type: "Limit",
+          side: "Buy",
           price: grid.buy.price,
           status: grid.buy.status,
         },
-        sell: {
+        tp: {
           type: "Limit",
+          side: "Sell",
           price: grid.sell.price,
           status: grid.sell.status,
         },
@@ -71,7 +73,7 @@ gridBot.schema = z.object({
   ),
 });
 gridBot.runPolicy = {
-  onOrderFilled: true,
+  onTradeCompleted: true,
 };
 
 export type GridBotConfig = IBotConfiguration<z.infer<typeof gridBot.schema>>;
