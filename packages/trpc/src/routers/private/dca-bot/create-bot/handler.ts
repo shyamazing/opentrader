@@ -1,8 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
 import { XBotType } from "@opentrader/types";
-import { xprisma } from "@opentrader/db";
-import { dca } from "@opentrader/bot-templates";
+import { xprisma, ZDcaBotSettings } from "@opentrader/db";
 import type { Context } from "../../../../utils/context.js";
 import type { TCreateDcaBotInputSchema } from "./schema.js";
 
@@ -32,7 +31,7 @@ export async function createDcaBot({ ctx, input }: Options) {
     });
   }
 
-  const parsed = dca.schema.safeParse(data.settings);
+  const parsed = ZDcaBotSettings.safeParse(data.settings);
   if (!parsed.success) {
     throw new TRPCError({
       message: `Invalid strategy params: ${parsed.error.message}`,
