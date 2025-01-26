@@ -1,6 +1,6 @@
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { logger } from "@opentrader/logger";
-import { settingsPath } from "./app-path.js";
+import { appPath, settingsPath } from "./app-path.js";
 
 type DaemonSettings = {
   host: string;
@@ -32,6 +32,11 @@ export function getSettings(): DaemonSettings {
 }
 
 export function saveSettings(settings: DaemonSettings): DaemonSettings {
+  if (!existsSync(appPath)) {
+    logger.info(`Creating app directory: ${appPath}`);
+    mkdirSync(appPath);
+  }
+
   writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
 
   return defaultSettings;
