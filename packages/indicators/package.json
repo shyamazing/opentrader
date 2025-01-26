@@ -16,7 +16,7 @@
     "eslint": "8.57.0",
     "ts-node": "10.9.2",
     "typescript": "5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^3.0.4"
   },
   "dependencies": {
     "technicalindicators": "^3.1.0"
