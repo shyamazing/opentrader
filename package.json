@@ -20,7 +20,6 @@
     "@moonrepo/cli": "1.28.3",
     "execa": "^9.5.2",
     "prettier": "^3.4.2",
-    "resolve-tspaths": "^0.8.23",
     "ts-node": "10.9.2",
     "tsconfig-moon": "^1.3.0",
     "typescript": "5.7.2"

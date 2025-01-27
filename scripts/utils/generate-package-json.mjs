@@ -71,8 +71,6 @@ export function generatePackageJson(outDir) {
     dependencies,
   };
 
-  newPackageJson.types = "dts/apps/cli/src/index.d.ts";
-
   // Add postinstall script
   newPackageJson.scripts = {
     postinstall: "node scripts/postinstall.mjs",

@@ -10,7 +10,6 @@ exchanges.json5
 
 # Release build for publishing on NPM
 /release
-/dts
 
 # Prisma SQLite database files
 dev.db

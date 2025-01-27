@@ -5,9 +5,9 @@ import { generatePackageJsonPlugin } from "./plugins/generate-package-json-plugi
 
 export default defineConfig({
   entry: {
-    main: "./src/index.ts",
+    cli: "./src/cli.ts",
     daemon: "./src/api/up/daemon.ts",
-    effects: "./src/effects.ts",
+    main: "./src/main.ts",
   }, // Adjust this to your entry file
   format: ["esm"],
   outDir: "dist",

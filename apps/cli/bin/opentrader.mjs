@@ -40,7 +40,7 @@ async function main() {
   };
 
   // Run the Node.js script
-  const args = [`${__dirname}/../dist/main.mjs`, ...process.argv.slice(2)];
+  const args = [`${__dirname}/../dist/cli.mjs`, ...process.argv.slice(2)];
   const child = spawn("node", args, { env, stdio: "inherit" });
 
   child.on("close", (code) => {
