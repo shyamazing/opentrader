@@ -9,6 +9,7 @@ import {
   TBotContext,
   BotTemplate,
   useIndicators,
+  type SmartTradeService,
 } from "@opentrader/bot-processor";
 
 export function* dca(ctx: TBotContext<DCABotConfig>) {
@@ -43,7 +44,11 @@ export function* dca(ctx: TBotContext<DCABotConfig>) {
       })),
     };
 
-    yield useDca(options);
+    const trade: SmartTradeService = yield useDca(options);
+    if (trade.isCompleted()) {
+      yield trade.replace();
+      logger.info(`[DCA] Trade replaced`);
+    }
 
     logger.info(options, `[DCA] Entry executed`);
   }
