@@ -16,7 +16,7 @@
  * Repository URL: https://github.com/bludnic/opentrader
  */
 import { xprisma } from "@opentrader/db";
-import { ExchangeClosedByUser, NetworkError, RequestTimeout } from "ccxt";
+import { AuthenticationError, ExchangeClosedByUser, ExchangeError, NetworkError, RequestTimeout } from "ccxt";
 import { logger } from "@opentrader/logger";
 import { OrderSynchronizerWatcher } from "./order-synchronizer-watcher.abstract.js";
 import { ExchangeCode } from "@opentrader/types";
@@ -88,7 +88,13 @@ export class OrderSynchronizerWsWatcher extends OrderSynchronizerWatcher {
           }
         }
       } catch (err) {
-        if (err instanceof NetworkError) {
+        if (err instanceof AuthenticationError || err instanceof ExchangeError) {
+          logger.warn(
+            `[OrderSynchronizerWs] API keys for "${this.exchange.name}" have expired or are invalid: ${err.message}`,
+          );
+          await this.disable();
+          break;
+        } else if (err instanceof NetworkError) {
           logger.warn(`[OrderSynchronizerWs] NetworkError occurred: ${err.message}. Timeout: 3s`);
           await new Promise((resolve) => setTimeout(resolve, 3000)); // prevents infinite cycle
           // https://github.com/ccxt/ccxt/issues/7951
