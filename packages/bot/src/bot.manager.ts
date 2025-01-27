@@ -55,6 +55,8 @@ export class BotManager {
 
     await bot.stop();
     this.bots = this.bots.filter((b) => b.bot.id !== id);
+
+    await this.marketsStream.clean(this.bots.map((b) => b.bot));
   }
 
   /**
