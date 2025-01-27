@@ -31,7 +31,7 @@ import {
   IOrderbook,
   ITicker,
 } from "@opentrader/types";
-import type { Dictionary, Market, Exchange } from "ccxt";
+import type { Market, Exchange } from "ccxt";
 
 export interface IExchange {
   isPaper: boolean;
@@ -41,7 +41,7 @@ export interface IExchange {
 
   destroy: () => Promise<void>;
 
-  loadMarkets: () => Promise<Dictionary<Market>>; // forward to `ccxt.loadMarkets`
+  loadMarkets: () => Promise<Record<string, Market>>; // forward to `ccxt.loadMarkets`
 
   accountAssets: () => Promise<IAccountAsset[]>;
   getLimitOrder: (body: IGetLimitOrderRequest) => Promise<IGetLimitOrderResponse>;

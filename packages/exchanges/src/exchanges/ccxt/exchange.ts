@@ -50,7 +50,7 @@ import type {
   ITicker,
 } from "@opentrader/types";
 import { pro } from "ccxt";
-import type { Dictionary, Market, Exchange } from "ccxt";
+import type { Market, Exchange } from "ccxt";
 import type { IExchange, IExchangeCredentials } from "../../types/index.js";
 import { cache } from "../../cache.js";
 import { fetcher } from "../../utils/next/fetcher.js";
@@ -91,7 +91,7 @@ export class CCXTExchange implements IExchange {
     await this.ccxt.close();
   }
 
-  async loadMarkets(): Promise<Dictionary<Market>> {
+  async loadMarkets(): Promise<Record<string, Market>> {
     const cacheProvider = cache.getCacheProvider();
     return cacheProvider.getMarkets(this.exchangeCode, this.ccxt);
   }
@@ -208,7 +208,7 @@ export class CCXTExchange implements IExchange {
 
     const spotMarkets = Object.entries(markets)
       .filter(([_currency, market]) => market?.type === type)
-      .reduce<Dictionary<Market>>((acc, [currency, market]) => {
+      .reduce<Record<string, Market>>((acc, [currency, market]) => {
         return {
           ...acc,
           [currency]: market,
