@@ -52,7 +52,7 @@ export class ExchangeAccountProcessor {
       };
     }
 
-    logger.info(
+    logger.debug(
       `[${this.exchangeAccount.exchangeCode} | ${this.exchangeAccount.name}]: Preparing ${orders.length} orders for synchronization`,
     );
 
@@ -173,7 +173,7 @@ export class ExchangeAccountProcessor {
     });
 
     logger.info(
-      `[${this.exchangeAccount.exchangeCode} | ${this.exchangeAccount.name}] Open orders: ${openOrders.length}: Closed orders: ${closedOrders.length}`,
+      `[${this.exchangeAccount.name}] Open orders: ${openOrders.length}: Closed orders: ${closedOrders.length}`,
     );
     const orders = [...closedOrders, ...openOrders];
     this.cachedOrders[symbol] = orders;
