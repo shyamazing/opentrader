@@ -1,5 +1,6 @@
 export * from "./exchange-accounts/router.js";
 export * from "./symbols/router.js";
+export * from "./candles/router.js";
 export * from "./bot/router.js";
 export * from "./dca-bot/router.js";
 export * from "./grid-bot/router.js";
