@@ -10,7 +10,7 @@ import { logger } from "@opentrader/logger";
 
 export function* testStopLoss(ctx: TBotContext<TestStopLossSchema>) {
   logger.info("[TestStopLoss] Executing strategy template");
-  const { entry, tp, sl } = ctx.config.settings;
+  const { entry, tp, sl, quantity } = ctx.config.settings;
 
   if (ctx.onStop) {
     logger.info("[TestStopLoss] Stopping strategy");
@@ -35,7 +35,7 @@ export function* testStopLoss(ctx: TBotContext<TestStopLossSchema>) {
         stopPrice: sl.stopPrice,
         price: sl.price,
       },
-      quantity: 0.0001,
+      quantity,
     });
     logger.info(smartTrade, "[TestStopLoss] Trade created");
   }
@@ -55,6 +55,7 @@ testStopLoss.schema = z.object({
     stopPrice: z.number().default(95000).describe("Stop price of the stop loss order."),
     price: z.number().default(90000).describe("Limit price of the stop loss order."),
   }),
+  quantity: z.number().default(0.0001).describe("Quantity in base currency."),
 });
 testStopLoss.hidden = true;
 testStopLoss.watchers = {
