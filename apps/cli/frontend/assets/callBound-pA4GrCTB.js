@@ -1,1 +1,0 @@
-import{g as a,a as c}from"./browser-wNi_qKFh.js";var t=a,i=c,e=i(t("String.prototype.indexOf")),s=function(r,o){var n=t(r,!!o);return typeof n=="function"&&e(r,".prototype.")>-1?i(n):n};export{s as c};
