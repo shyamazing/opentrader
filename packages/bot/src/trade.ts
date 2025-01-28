@@ -19,6 +19,7 @@ export class Trade {
   exchange: IExchange;
   queue: QueueObject<QueueEvent>;
   tickerWatcher: TickerWatcher;
+  destroyed = false;
 
   constructor(
     public smartTrade: SmartTradeWithOrders,
@@ -35,18 +36,13 @@ export class Trade {
 
       if (err instanceof InsufficientFunds) {
         logger.warn(`Insufficient funds to place the order: ${err.message}. Retrying in 1 minute...`);
-        this.queue.pause();
-        setTimeout(() => {
-          this.queue.resume();
-        }, 60_000);
-
-        return;
+      } else {
+        logger.error(err, `[TradeQueue] An error occurred: ${err.message}. Retrying in 1 minute...`);
       }
 
-      logger.error(err, `[TradeQueue] An error occurred: ${err.message}. Retrying in 1 minute...`);
       this.queue.pause();
       setTimeout(() => {
-        this.queue.resume();
+        if (!this.destroyed) this.queue.resume();
       }, 60_000);
     });
   }
@@ -77,6 +73,7 @@ export class Trade {
     this.tickerWatcher.off("ticker", this.handleTickerEvent);
     this.tickerWatcher.disable();
     this.queue.kill();
+    this.destroyed = true;
   }
 
   async next() {
