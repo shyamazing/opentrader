@@ -27,6 +27,7 @@ export type QueueEvent = ProcessingEvent & { bot: TBotWithExchangeAccount; subsc
 export class Bot {
   strategy: ReturnType<typeof findStrategy>;
   queue: QueueObject<QueueEvent>;
+  stopped = false;
 
   constructor(
     public bot: TBotWithExchangeAccount,
@@ -36,7 +37,15 @@ export class Bot {
     this.strategy = findStrategy(this.bot.template);
     this.queue = cargoQueue<QueueEvent>(this.queueHandler);
     this.queue.error((error) => {
-      logger.error(error, `[BotQueue] An error occurred: ${error.message}`);
+      if (this.queue.paused) return;
+
+      logger.error(error, `[BotQueue] An error occurred: ${error.message}. Retrying in 1 minute...`);
+      this.queue.pause();
+      setTimeout(() => {
+        if (!this.stopped) {
+          this.queue.resume();
+        }
+      }, 60_000);
     });
   }
 
@@ -166,6 +175,8 @@ export class Bot {
     this.ordersStream.off("order", this.handleOrderEvent);
     this.marketsStream.off("market", this.handleMarketEvent);
     eventBus.off("onTradeCompleted", this.handleTradeCompletedEvent);
+    this.queue.kill();
+    this.stopped = true;
 
     // Mark the bot as disabled
     this.bot = await xprisma.bot.custom.update({

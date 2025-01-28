@@ -7,3 +7,4 @@ export * from "./trades.js";
 export * from "./testMarketOrder.js";
 export * from "./dca.js";
 export * from "./stopLoss.js";
+export * from "./testError.js";
