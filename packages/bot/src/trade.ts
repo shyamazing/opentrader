@@ -1,3 +1,4 @@
+import { InsufficientFunds } from "ccxt";
 import { cargoQueue, QueueObject } from "async";
 import { type ExchangeAccountWithCredentials, SmartTradeWithOrders, xprisma } from "@opentrader/db";
 import { eventBus } from "@opentrader/event-bus";
@@ -29,8 +30,24 @@ export class Trade {
     this.tickerWatcher = new TickerWatcher(this.smartTrade.symbol, this.exchange);
 
     this.queue = cargoQueue<QueueEvent>(this.queueHandler);
-    this.queue.error((error) => {
-      logger.error(error, `[TradeQueue] An error occurred: ${error.message}`);
+    this.queue.error((err) => {
+      if (this.queue.paused) return;
+
+      if (err instanceof InsufficientFunds) {
+        logger.warn(`Insufficient funds to place the order: ${err.message}. Retrying in 1 minute...`);
+        this.queue.pause();
+        setTimeout(() => {
+          this.queue.resume();
+        }, 60_000);
+
+        return;
+      }
+
+      logger.error(err, `[TradeQueue] An error occurred: ${err.message}. Retrying in 1 minute...`);
+      this.queue.pause();
+      setTimeout(() => {
+        this.queue.resume();
+      }, 60_000);
     });
   }
 
