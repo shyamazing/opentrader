@@ -3,6 +3,7 @@ import { logger } from "@opentrader/logger";
 import { Bot } from "./bot.js";
 import { MarketsStream } from "./streams/markets.stream.js";
 import { OrdersStream } from "./streams/orders.stream.js";
+import { TradeManager } from "./trade.manager.js";
 
 export class BotManager {
   bots: Bot[] = [];
@@ -10,6 +11,7 @@ export class BotManager {
   constructor(
     private ordersStream: OrdersStream,
     private marketsStream: MarketsStream,
+    private tradeManager: TradeManager,
   ) {}
 
   async start(id: number) {
@@ -22,7 +24,7 @@ export class BotManager {
       include: { exchangeAccount: true },
     });
 
-    const bot = new Bot(data, this.ordersStream, this.marketsStream);
+    const bot = new Bot(data, this.ordersStream, this.marketsStream, this.tradeManager);
 
     try {
       await bot.start();
@@ -47,7 +49,7 @@ export class BotManager {
         where: { id },
         include: { exchangeAccount: true },
       });
-      const bot = new Bot(data, this.ordersStream, this.marketsStream);
+      const bot = new Bot(data, this.ordersStream, this.marketsStream, this.tradeManager);
       await bot.stop();
 
       return;

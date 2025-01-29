@@ -33,8 +33,8 @@ export class Platform {
     this.marketStream = new MarketsStream([]);
     this.marketStream.on("market", this.handleMarketEvent);
 
-    this.botManager = new BotManager(this.ordersStream, this.marketStream);
     this.tradeManager = new TradeManager(this.ordersStream);
+    this.botManager = new BotManager(this.ordersStream, this.marketStream, this.tradeManager);
   }
 
   async bootstrap() {

@@ -8,6 +8,7 @@ import { BotProcessing, getWatchers, shouldRunStrategy } from "@opentrader/proce
 import { MarketEvent, MarketId, MarketEventType } from "@opentrader/types";
 import { MarketsStream } from "./streams/markets.stream.js";
 import { OrderEvent, OrdersStream } from "./streams/orders.stream.js";
+import { TradeManager } from "./trade.manager.js";
 
 type OrderFilledEvent = {
   type: typeof MarketEventType.onOrderFilled;
@@ -33,6 +34,7 @@ export class Bot {
     public bot: TBotWithExchangeAccount,
     private ordersStream: OrdersStream,
     private marketsStream: MarketsStream,
+    private tradeManager: TradeManager,
   ) {
     this.strategy = findStrategy(this.bot.template);
     this.queue = cargoQueue<QueueEvent>(this.queueHandler);
@@ -177,6 +179,12 @@ export class Bot {
     eventBus.off("onTradeCompleted", this.handleTradeCompletedEvent);
     this.queue.kill();
     this.stopped = true;
+
+    // Stop all trades executors
+    const trades = this.tradeManager.trades.filter((trade) => trade.smartTrade.botId === this.bot.id);
+    for (const trade of trades) {
+      trade.destroy();
+    }
 
     // Mark the bot as disabled
     this.bot = await xprisma.bot.custom.update({
